@@ -1,0 +1,1029 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>МЕРИДИАН-7 · полярный детектив</title>
+<style>
+:root{
+  --bg0:#04070f; --bg1:#0a1322; --panel:#0c1828; --panel2:#10203a; --line:#1d3a5f;
+  --ice:#8fd8ff; --ice-dim:#4a7fa6; --txt:#dcebf7; --dim:#7fa3c0;
+  --amber:#ffb454; --red:#ff6b6b; --green:#5fe3a1; --teal:#39d0c4; --blue:#5aa2ff;
+  --paper:#ece3cc; --paper2:#ddd2b4; --ink:#2b2618;
+  --mono:"Cascadia Code","JetBrains Mono",Consolas,"Courier New",monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{background:var(--bg0);color:var(--txt);font-family:var(--mono);font-size:14px;overflow:hidden}
+::selection{background:var(--ice);color:var(--bg0)}
+::-webkit-scrollbar{width:10px;height:10px}
+::-webkit-scrollbar-track{background:var(--bg1)}
+::-webkit-scrollbar-thumb{background:var(--line);border-radius:6px;border:2px solid var(--bg1)}
+::-webkit-scrollbar-thumb:hover{background:var(--ice-dim)}
+*{scrollbar-width:thin;scrollbar-color:var(--line) var(--bg1)}
+button{font-family:var(--mono);cursor:pointer}
+button:focus-visible,input:focus-visible{outline:2px solid var(--ice);outline-offset:2px}
+#sky{position:fixed;inset:0;z-index:0;background:
+  radial-gradient(1200px 600px at 70% -10%,#12294a 0%,transparent 60%),
+  radial-gradient(900px 500px at 10% 110%,#0d2036 0%,transparent 60%),
+  linear-gradient(180deg,#050a16 0%,#081226 55%,#04070f 100%)}
+.aurora{position:fixed;inset:-20% -10%;z-index:0;pointer-events:none;opacity:.5;filter:blur(40px);
+  background:conic-gradient(from 200deg at 60% 20%,transparent 0deg,rgba(57,208,196,.14) 40deg,rgba(90,162,255,.12) 90deg,transparent 140deg,rgba(111,227,165,.08) 200deg,transparent 260deg);
+  animation:aur 26s ease-in-out infinite alternate}
+@keyframes aur{from{transform:translateX(-4%) skewX(-4deg)}to{transform:translateX(4%) skewX(3deg)}}
+#snow{position:fixed;inset:0;z-index:1;pointer-events:none}
+#grain{position:fixed;inset:0;z-index:2;pointer-events:none;opacity:.07;mix-blend-mode:overlay;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)' opacity='0.6'/%3E%3C/svg%3E")}
+#scan{position:fixed;inset:0;z-index:2;pointer-events:none;opacity:.05;background:repeating-linear-gradient(0deg,transparent 0 2px,#9fd8ff 2px 3px)}
+#vig{position:fixed;inset:0;z-index:2;pointer-events:none;background:radial-gradient(120% 90% at 50% 40%,transparent 55%,rgba(2,5,12,.75) 100%)}
+#app{position:relative;z-index:3;height:100%;display:flex;flex-direction:column}
+header{height:58px;flex:0 0 58px;display:flex;align-items:center;gap:10px;padding:0 14px;background:linear-gradient(180deg,rgba(16,32,58,.95),rgba(10,19,34,.95));border-bottom:1px solid var(--line)}
+.brand{display:flex;flex-direction:column;line-height:1.15;margin-right:auto;min-width:0}
+.brand b{font-size:16px;letter-spacing:3px;color:var(--ice);text-shadow:0 0 14px rgba(143,216,255,.5);white-space:nowrap}
+.brand span{font-size:10px;letter-spacing:2px;color:var(--dim);white-space:nowrap}
+.hcount{font-size:11px;color:var(--dim);letter-spacing:1px;padding:4px 8px;border:1px solid var(--line);border-radius:4px;background:var(--bg1);white-space:nowrap}
+.hcount b{color:var(--ice)}
+.btn{background:var(--panel2);color:var(--txt);border:1px solid var(--line);border-radius:5px;padding:7px 12px;font-size:11px;letter-spacing:1.5px;text-transform:uppercase;transition:.15s;white-space:nowrap}
+.btn:hover{border-color:var(--ice);color:var(--ice);box-shadow:0 0 12px rgba(143,216,255,.25)}
+.btn:disabled{opacity:.35;cursor:not-allowed;box-shadow:none}
+.btn-accent{border-color:var(--amber);color:var(--amber)}
+.btn-accent:hover{border-color:var(--amber);color:#ffd9a0;box-shadow:0 0 14px rgba(255,180,84,.35)}
+.btn-danger{border-color:var(--red);color:var(--red)}
+.btn-danger:hover{box-shadow:0 0 12px rgba(255,107,107,.3);color:#ff9c9c}
+.btn-green{border-color:var(--green);color:var(--green)}
+.btn-sm{padding:4px 8px;font-size:10px}
+main{flex:1;display:grid;grid-template-columns:300px minmax(0,1fr) 350px;gap:12px;padding:12px;min-height:0}
+aside,section{min-height:0}
+.panel{background:linear-gradient(180deg,rgba(13,26,46,.92),rgba(9,17,31,.92));border:1px solid var(--line);border-radius:8px;display:flex;flex-direction:column;min-height:0;overflow:hidden;box-shadow:0 8px 30px rgba(0,0,0,.4)}
+.p-head{flex:0 0 auto;padding:10px 12px;border-bottom:1px solid var(--line);font-size:11px;letter-spacing:2px;color:var(--ice);display:flex;align-items:center;gap:8px;background:rgba(16,32,58,.5)}
+.p-head .dot{width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 8px var(--green);animation:blink 2.4s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.35}}
+.p-body{flex:1;overflow-y:auto;padding:12px;min-height:0}
+#mapSvg{width:100%;height:auto;display:block}
+#mapSvg .room{fill:rgba(29,58,95,.25);stroke:var(--ice-dim);stroke-width:1.4;cursor:pointer;transition:.15s}
+#mapSvg .room:hover{fill:rgba(143,216,255,.14);stroke:var(--ice)}
+#mapSvg .room.visited{fill:rgba(57,208,196,.10)}
+#mapSvg .room.current{fill:rgba(143,216,255,.18);stroke:var(--ice);stroke-width:2;filter:drop-shadow(0 0 6px rgba(143,216,255,.7))}
+#mapSvg .room.locked{fill:rgba(255,180,84,.06);stroke:var(--amber);stroke-dasharray:4 3}
+#mapSvg text{font-family:var(--mono);pointer-events:none}
+#mapSvg .rlab{fill:var(--txt);font-size:9.5px;letter-spacing:1px}
+#mapSvg .rsub{fill:var(--dim);font-size:8px}
+#mapSvg .corr{stroke:var(--line);stroke-width:8;fill:none}
+#mapSvg .corr2{stroke:var(--ice-dim);stroke-width:1;fill:none;stroke-dasharray:2 4}
+#mapSvg .shake{animation:shk .35s}
+@keyframes shk{0%,100%{transform:translateX(0)}25%{transform:translateX(-4px)}75%{transform:translateX(4px)}}
+.legend{display:flex;gap:12px;font-size:10px;color:var(--dim);padding:8px 12px;border-top:1px solid var(--line);flex-wrap:wrap}
+.obj{margin-top:12px}.status{margin-top:12px}
+.obj .p-body{font-size:12px;line-height:1.55;color:var(--txt)}
+.status .p-body{font-size:11px;line-height:1.9;color:var(--dim)}
+.status b{color:var(--teal);font-weight:normal}.status .bad{color:var(--red)}
+/* ИЗМЕНЕНИЕ: Центральная колонка и панель осмотра */
+#center{display:flex;flex-direction:column;gap:12px;min-height:0;height:100%}
+#locHead{flex:0 0 auto}
+#locHead h2{font-size:18px;letter-spacing:3px;color:var(--ice);margin-bottom:4px}
+#locHead p{font-size:12px;color:var(--dim);line-height:1.5}
+/* Схема комнаты теперь занимает не более 40% высоты */
+#sceneWrap{flex:0 1 auto;padding:8px;max-height:40vh;display:flex;justify-content:center;align-items:center;overflow:hidden}
+#sceneSvg{width:100%;height:auto;max-height:100%;display:block}
+#sceneSvg .f{fill:none;stroke:var(--ice-dim);stroke-width:1.5}
+#sceneSvg .ff{fill:rgba(29,58,95,.3);stroke:var(--ice-dim);stroke-width:1.5}
+#sceneSvg .fd{fill:none;stroke:var(--line);stroke-width:1.2}
+#sceneSvg .ghost{fill:none;stroke:var(--amber);stroke-width:1.5;stroke-dasharray:6 5;opacity:.7}
+#sceneSvg .fl{stroke:var(--ice-dim);stroke-width:2}
+#sceneSvg .slab{fill:var(--dim);font-size:9px;letter-spacing:1px;font-family:var(--mono)}
+.zone{cursor:pointer}
+.zone .zbox{fill:rgba(143,216,255,.06);stroke:var(--ice);stroke-width:1.3;stroke-dasharray:5 4;rx:6;transition:.15s;animation:zp 2.6s infinite}
+@keyframes zp{0%,100%{stroke-opacity:.9}50%{stroke-opacity:.35}}
+.zone:hover .zbox,.zone .zbox:hover{fill:rgba(143,216,255,.18);stroke-dasharray:none;animation:none}
+.zone.done .zbox{fill:rgba(95,227,161,.04);stroke:var(--ice-dim);stroke-dasharray:none;animation:none;opacity:.65}
+.zone .zlab{fill:var(--ice);font-size:11px;letter-spacing:.5px;font-family:var(--mono);paint-order:stroke;stroke:#04070f;stroke-width:4px;pointer-events:none}
+.zone.done .zlab{fill:var(--dim)}
+.zone .zmark{font-size:11px;font-family:var(--mono);pointer-events:none}
+/* Панель осмотра забирает всё оставшееся место */
+#inspect{flex:1 1 auto;min-height:250px}
+#inspect .p-body{font-size:13px;line-height:1.65}
+#inspect .zh{font-size:12px;letter-spacing:2px;color:var(--amber);margin-bottom:8px}
+#inspect p{margin-bottom:10px}
+#inspect .hint{color:var(--dim);font-style:italic}
+
+.clue-card{background:linear-gradient(160deg,var(--paper),var(--paper2));color:var(--ink);border-radius:4px;padding:14px 16px;margin:12px 0;border:1px solid #b8ab8a;box-shadow:0 6px 18px rgba(0,0,0,.5);position:relative}
+.clue-card::before{content:"";position:absolute;inset:0;border-radius:4px;pointer-events:none;opacity:.35;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100'%3E%3Cfilter id='p'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8'/%3E%3C/filter%3E%3Crect width='100' height='100' filter='url(%23p)' opacity='0.12'/%3E%3C/svg%3E")}
+.clue-card .stamp{font-size:10px;letter-spacing:2px;color:#7a6a45;border:1px solid #a8986e;display:inline-block;padding:2px 7px;border-radius:3px;margin-bottom:8px;transform:rotate(-1.5deg)}
+.clue-card h4{font-size:14px;letter-spacing:1px;margin-bottom:6px}
+.clue-card .where{font-size:10px;color:#7a6a45;margin-bottom:8px;letter-spacing:1px}
+.clue-card p{font-size:12.5px;line-height:1.6;margin-bottom:6px}
+.clue-card .added{font-size:10px;letter-spacing:2px;color:#2c6e49;margin-top:6px}
+.clue-card.keycard{border-color:var(--amber);background:linear-gradient(160deg,#f0dfba,#e2cd9c)}
+.clue-note{border-top:1px dashed #a8986e;margin-top:8px;padding-top:8px}
+.clue-note b{font-size:10px;letter-spacing:1px;color:#5a4a25;display:block;margin-bottom:4px}
+.clue-note p{font-size:11.5px;color:#3a3220}
+.tuner{border:1px solid var(--line);border-radius:6px;padding:12px;background:var(--bg1);margin:10px 0}
+.t-read{font-size:22px;color:var(--green);letter-spacing:3px;text-shadow:0 0 10px rgba(95,227,161,.6);margin-bottom:8px}
+.t-read small{font-size:11px;color:var(--dim)}
+input[type=range]{width:100%;-webkit-appearance:none;appearance:none;height:6px;border-radius:3px;background:linear-gradient(90deg,var(--line),var(--ice-dim));margin:8px 0}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:18px;height:18px;border-radius:50%;background:var(--ice);border:2px solid var(--bg0);box-shadow:0 0 10px rgba(143,216,255,.8);cursor:pointer}
+input[type=range]::-moz-range-thumb{width:16px;height:16px;border-radius:50%;background:var(--ice);border:2px solid var(--bg0);cursor:pointer}
+.t-scale{display:flex;justify-content:space-between;font-size:9px;color:var(--dim);margin-bottom:10px}
+#tres{margin-top:10px;font-size:12px;color:var(--teal);line-height:1.6;min-height:18px}
+.tape-lines{list-style:none;margin:10px 0;border-left:2px solid var(--line);padding-left:12px}
+.tape-lines li{margin-bottom:8px;font-size:12.5px;line-height:1.55;opacity:0;transform:translateY(6px)}
+.tape-lines.play li,.tape-lines.show li{opacity:1;transform:none;transition:.5s}
+.tape-lines.play li:nth-child(1){transition-delay:.2s}.tape-lines.play li:nth-child(2){transition-delay:1.2s}
+.tape-lines.play li:nth-child(3){transition-delay:2.4s}.tape-lines.play li:nth-child(4){transition-delay:3.6s}
+.tape-lines.play li:nth-child(5){transition-delay:4.6s}.tape-lines.play li:nth-child(6){transition-delay:5.6s}
+.tape-lines li b{color:var(--amber);font-weight:normal}.tape-lines li i{color:var(--dim)}
+.tabs{display:flex;border-bottom:1px solid var(--line);flex:0 0 auto}
+.tab{flex:1;background:none;border:none;color:var(--dim);padding:10px 4px;font-size:10.5px;letter-spacing:1.5px;border-bottom:2px solid transparent}
+.tab:hover{color:var(--ice)}.tab.on{color:var(--ice);border-bottom-color:var(--ice);background:rgba(143,216,255,.05)}
+.clue{display:flex;align-items:stretch;gap:6px;margin-bottom:8px;border:1px solid var(--line);border-radius:6px;background:var(--bg1);overflow:hidden;transition:.15s;position:relative}
+.clue:hover{border-color:var(--ice-dim)}.clue.sel{border-color:var(--amber);box-shadow:0 0 10px rgba(255,180,84,.25)}
+.clue.new{animation:newclue 1.2s}
+@keyframes newclue{0%{box-shadow:0 0 0 rgba(95,227,161,0)}30%{box-shadow:0 0 22px rgba(95,227,161,.8)}100%{box-shadow:none}}
+.clue-main{flex:1;background:none;border:none;color:var(--txt);text-align:left;padding:9px 10px;display:flex;flex-direction:column;gap:3px;min-width:0}
+.clue-main .cn{font-size:12px;letter-spacing:.5px;display:flex;gap:7px;align-items:center}
+.clue-main .cn .cat{color:var(--teal);flex:0 0 auto}.clue-main .cw{font-size:9.5px;color:var(--dim);letter-spacing:1px}
+.clue-info{flex:0 0 34px;background:var(--panel2);border:none;border-left:1px solid var(--line);color:var(--dim);font-size:13px}
+.clue-info:hover{color:var(--ice)}
+.selbadge{position:absolute;top:-1px;right:-1px;background:var(--amber);color:var(--bg0);font-size:10px;font-weight:bold;width:18px;height:18px;display:flex;align-items:center;justify-content:center;border-radius:0 5px 0 6px}
+.empty{color:var(--dim);font-size:12px;line-height:1.7;padding:8px 4px;font-style:italic}
+#cmpBar{flex:0 0 auto;border-top:1px solid var(--line);padding:10px 12px;background:rgba(16,32,58,.6)}
+#cmpBar .selnames{font-size:10.5px;color:var(--dim);margin-bottom:8px;line-height:1.6;min-height:28px}
+#cmpBar .selnames b{color:var(--amber);font-weight:normal}
+#cmpBar.attn{animation:attn 1s 2}
+@keyframes attn{0%,100%{box-shadow:none}50%{box-shadow:inset 0 0 30px rgba(255,180,84,.3)}}
+.doss{border:1px solid var(--line);border-radius:6px;margin-bottom:10px;background:var(--bg1);overflow:hidden}
+.doss-h{padding:9px 11px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;background:var(--panel2)}
+.doss-h b{font-size:12px;color:var(--ice);letter-spacing:1px;font-weight:normal}.doss-h span{font-size:9.5px;color:var(--dim);letter-spacing:1px}
+.doss-b{padding:10px 12px;font-size:11.5px;line-height:1.6;display:none}.doss.open .doss-b{display:block}
+.doss-b .role{color:var(--teal);font-size:10px;letter-spacing:1.5px;margin-bottom:6px}.doss-b .prof{color:var(--dim);margin-bottom:8px}
+.rec{border-left:2px solid var(--green);padding:6px 10px;margin:8px 0;background:rgba(95,227,161,.05)}
+.rec b{color:var(--green);font-weight:normal;font-size:10.5px;letter-spacing:1px;display:block;margin-bottom:4px}
+.rec.locked{border-left-color:var(--line);background:none;color:var(--dim);font-style:italic}
+.ded{border:1px solid var(--line);border-left:3px solid var(--teal);border-radius:6px;padding:10px 12px;margin-bottom:10px;background:var(--bg1)}
+.ded b{color:var(--teal);font-size:12px;letter-spacing:1px;display:block;margin-bottom:6px;font-weight:normal}
+.ded p{font-size:11.5px;line-height:1.6;color:var(--txt)}.ded .pair{font-size:9.5px;color:var(--dim);margin-top:6px;letter-spacing:1px}
+#modalRoot{position:fixed;inset:0;z-index:50;display:none}
+#modalRoot.on{display:block}
+.mback{position:absolute;inset:0;background:rgba(2,5,12,.8);backdrop-filter:blur(3px);animation:fin .2s}
+@keyframes fin{from{opacity:0}to{opacity:1}}
+.modal{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:min(620px,94vw);max-height:88vh;background:linear-gradient(180deg,#10203a,#0a1322);border:1px solid var(--ice-dim);border-radius:10px;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 20px 80px rgba(0,0,0,.8),0 0 40px rgba(143,216,255,.12);animation:mpop .25s}
+@keyframes mpop{from{opacity:0;transform:translate(-50%,-48%) scale(.97)}to{opacity:1;transform:translate(-50%,-50%) scale(1)}}
+.modal.wide{width:min(900px,96vw)}
+.modal.xwide{width:96vw; height:92vh; max-width:1600px; max-height:94vh;}
+.m-head{padding:14px 18px;border-bottom:1px solid var(--line);font-size:13px;letter-spacing:2.5px;color:var(--ice);display:flex;justify-content:space-between;align-items:center}
+.m-x{background:none;border:none;color:var(--dim);font-size:16px;padding:2px 6px}.m-x:hover{color:var(--red)}
+.m-body{padding:16px 18px;overflow-y:auto;font-size:13px;line-height:1.7}.m-body p{margin-bottom:10px}
+.m-foot{padding:12px 18px;border-top:1px solid var(--line);display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap}
+.m-body .big{font-size:15px;color:var(--ice)}.m-body .ok{color:var(--green)}.m-body .warn{color:var(--amber)}.m-body .bad{color:var(--red)}
+.kpad{display:flex;gap:10px;align-items:center;margin:12px 0}
+.kpad input{background:var(--bg0);border:1px solid var(--ice-dim);color:var(--green);font-family:var(--mono);font-size:24px;letter-spacing:12px;text-align:center;padding:8px;width:170px;border-radius:6px}
+.vcard{border:1px solid var(--line);border-radius:8px;padding:12px 14px;margin-bottom:10px;cursor:pointer;background:var(--bg1);transition:.15s}
+.vcard:hover{border-color:var(--ice-dim)}.vcard.on{border-color:var(--amber);background:rgba(255,180,84,.07);box-shadow:0 0 14px rgba(255,180,84,.2)}
+.vcard b{display:block;font-size:13px;letter-spacing:1.5px;color:var(--ice);margin-bottom:5px;font-weight:normal}.vcard.on b{color:var(--amber)}
+.vcard p{font-size:11.5px;color:var(--dim);line-height:1.55;margin:0}
+.chain{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0}
+.slot{width:calc(25% - 6px);min-height:52px;border:1px dashed var(--line);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:10px;color:var(--dim);padding:4px;text-align:center;line-height:1.4}
+.slot.fill{border:1px solid var(--amber);color:var(--amber);background:rgba(255,180,84,.07)}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.chip{border:1px solid var(--line);background:var(--bg1);color:var(--txt);border-radius:20px;padding:5px 11px;font-size:10.5px;letter-spacing:.5px;transition:.12s}
+.chip:hover{border-color:var(--ice)}.chip.on{border-color:var(--amber);color:var(--amber);background:rgba(255,180,84,.1)}
+.fin-err{color:var(--red);font-size:12px;margin-top:10px;min-height:18px;line-height:1.5}
+.ending .m-body{font-size:13.5px}
+.ending h1{font-size:24px;letter-spacing:4px;color:var(--ice);margin-bottom:4px;text-shadow:0 0 20px rgba(143,216,255,.5)}
+.ending .etype{font-size:10px;letter-spacing:3px;margin-bottom:16px;display:inline-block;padding:3px 10px;border-radius:3px}
+.etype.true{color:var(--green);border:1px solid var(--green)}.etype.alt{color:var(--red);border:1px solid var(--red)}
+.estats{display:flex;gap:14px;flex-wrap:wrap;border-top:1px solid var(--line);padding-top:12px;margin-top:14px;font-size:11px;color:var(--dim)}
+.estats b{color:var(--teal);font-weight:normal}.echain{margin:10px 0;font-size:11px;color:var(--dim)}.echain b{color:var(--amber);font-weight:normal}
+#toasts{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);z-index:80;display:flex;flex-direction:column;gap:8px;align-items:center;pointer-events:none}
+.toast{background:var(--panel2);border:1px solid var(--ice-dim);color:var(--txt);padding:9px 18px;border-radius:6px;font-size:11.5px;letter-spacing:1.5px;box-shadow:0 8px 30px rgba(0,0,0,.6);animation:tin .25s;max-width:90vw;text-align:center}
+.toast.ok{border-color:var(--green);color:var(--green)}.toast.warn{border-color:var(--amber);color:var(--amber)}.toast.bad{border-color:var(--red);color:var(--red)}
+@keyframes tin{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+#start{position:fixed;inset:0;z-index:60;display:flex;align-items:center;justify-content:center;background:rgba(2,5,12,.72);backdrop-filter:blur(4px)}
+.start-card{text-align:center;max-width:640px;padding:30px;animation:mpop .5s}
+.start-card .st{font-size:11px;letter-spacing:6px;color:var(--teal);margin-bottom:14px}
+.start-card h1{font-size:clamp(34px,7vw,58px);letter-spacing:10px;color:var(--ice);text-shadow:0 0 30px rgba(143,216,255,.6),0 0 80px rgba(57,208,196,.3);margin-bottom:10px}
+.start-card .sub{font-size:12px;letter-spacing:3px;color:var(--dim);margin-bottom:26px}
+.start-card .intro{font-size:13px;line-height:1.8;color:var(--txt);text-align:left;border:1px solid var(--line);border-radius:8px;padding:18px 20px;background:rgba(10,19,34,.8);margin-bottom:26px}
+.start-card .intro p{margin-bottom:10px}.start-btns{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}.btn-big{padding:12px 26px;font-size:13px}
+.scrim{position:fixed;inset:0;z-index:39;background:rgba(2,5,12,.6);display:none}
+#btnMap,#btnJournal{display:none}
+/* новые механики */
+.item-grid{display:grid;grid-template-columns:minmax(0, 1fr) 400px;gap:20px;height:100%;}
+.item-svg-wrap{border:1px solid var(--line);border-radius:8px;background:radial-gradient(600px 300px at 50% 0%,rgba(29,58,95,.4),rgba(4,7,15,.9));padding:8px;display:flex;align-items:center;justify-content:center;}
+.itemSvg{width:100%;height:auto;display:block}
+.itemSvg .if{fill:none;stroke:var(--ice-dim);stroke-width:1.6}
+.itemSvg .iff{fill:rgba(29,58,95,.35);stroke:var(--ice-dim);stroke-width:1.6}
+.itemSvg .ifd{fill:none;stroke:var(--line);stroke-width:1.2}
+.itemSvg .iam{fill:none;stroke:var(--amber);stroke-width:1.5;stroke-dasharray:5 4}
+.itemSvg .ilab{fill:var(--dim);font-size:10px;letter-spacing:1px;font-family:var(--mono)}
+.itemSvg .itxt{fill:var(--txt);font-size:12px;font-family:var(--mono)}
+.itemSvg .iglow{fill:var(--green);filter:drop-shadow(0 0 6px rgba(95,227,161,.8))}
+.part{cursor:pointer}
+.part .pbox{fill:rgba(143,216,255,.05);stroke:var(--ice);stroke-width:1.2;stroke-dasharray:4 3;transition:.15s}
+.part:hover .pbox,.part .pbox:hover{fill:rgba(143,216,255,.18);stroke-dasharray:none}
+.part.done .pbox{stroke:var(--ice-dim);stroke-dasharray:none;opacity:.6}
+.part .plab{fill:var(--ice);font-size:10.5px;font-family:var(--mono);paint-order:stroke;stroke:#04070f;stroke-width:4px;pointer-events:none}
+.part.done .plab{fill:var(--dim)}
+.item-info{border:1px solid var(--line);border-radius:8px;background:var(--bg1);padding:16px;font-size:13px;line-height:1.65;min-height:300px}
+.item-info h4{color:var(--amber);font-size:12px;letter-spacing:1.5px;margin-bottom:8px;font-weight:normal}
+.item-info .sub{color:var(--dim);font-size:10px;letter-spacing:1px;margin-bottom:10px}
+.item-info .msg{color:var(--txt)}
+.item-info .msg b{color:var(--green);font-weight:normal}
+.timebar{display:flex;gap:6px;flex-wrap:wrap;margin:10px 0}
+.timebar .btn.on{border-color:var(--teal);color:var(--teal);background:rgba(57,208,196,.08)}
+.puzzle-wrap{border:1px solid var(--line);border-radius:8px;background:radial-gradient(600px 300px at 50% 0%,rgba(29,58,95,.35),rgba(4,7,15,.9));padding:12px;margin:10px 0}
+.puzzle-svg{width:100%;height:auto;display:block}
+.puzzle-svg .pf{fill:none;stroke:var(--ice-dim);stroke-width:1.5}
+.puzzle-svg .pff{fill:rgba(29,58,95,.35);stroke:var(--ice-dim);stroke-width:1.5}
+.puzzle-svg .pfd{fill:none;stroke:var(--line);stroke-width:1.2}
+.puzzle-svg .ptxt{fill:var(--txt);font-size:11px;font-family:var(--mono)}
+.puzzle-svg .plab{fill:var(--dim);font-size:9px;font-family:var(--mono);letter-spacing:1px}
+.socket{cursor:pointer}
+.socket circle{fill:var(--bg1);stroke:var(--ice);stroke-width:2;transition:.15s}
+.socket:hover circle,.socket circle:hover{fill:rgba(143,216,255,.2)}
+.socket.sel circle{fill:var(--amber);stroke:var(--amber)}
+.socket.linked circle{fill:var(--green);stroke:var(--green)}
+.wire{stroke:var(--green);stroke-width:3;fill:none;stroke-linecap:round;filter:drop-shadow(0 0 4px rgba(95,227,161,.6))}
+.wire.bad{stroke:var(--red)}
+.puzzle-status{font-size:12px;line-height:1.6;color:var(--teal);margin-top:10px;min-height:20px}
+.puzzle-status.ok{color:var(--green)}.puzzle-status.bad{color:var(--red)}
+.puzzle-hint{border-left:3px solid var(--amber);background:rgba(255,180,84,.06);padding:10px 12px;font-size:12px;line-height:1.6;color:var(--txt);margin:10px 0}
+.puzzle-hint b{color:var(--amber);font-weight:normal}
+.pcards{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:10px 0}
+.pcard{border:1px solid #b8ab8a;background:linear-gradient(160deg,var(--paper),var(--paper2));color:var(--ink);border-radius:4px;padding:10px;cursor:pointer;position:relative;transition:.15s;min-height:120px}
+.pcard:hover{transform:translateY(-2px);box-shadow:0 6px 16px rgba(0,0,0,.4)}
+.pcard.sel{border-color:var(--amber);box-shadow:0 0 0 2px rgba(255,180,84,.4)}
+.pcard .pc-date{font-size:13px;font-weight:bold;margin-bottom:6px}
+.pcard .pc-holes{display:grid;grid-template-columns:repeat(8,1fr);gap:3px;margin:6px 0}
+.pcard .pc-holes span{width:8px;height:8px;border-radius:50%;background:#b8ab8a}
+.pcard .pc-holes span.on{background:#2b2618}
+.pcard .pc-code{font-size:9px;letter-spacing:.5px;color:#5a4a25;margin-top:6px;min-height:24px}
+.pcard.anom{border-color:var(--red);box-shadow:0 0 0 2px rgba(255,107,107,.35)}
+.pcard.anom .pc-code{color:#8a2a2a;font-weight:bold}
+.carrier-grid{display:grid;grid-template-columns:280px minmax(0,1fr);gap:16px;align-items:center}
+.dial{width:220px;height:220px;margin:0 auto;cursor:grab;touch-action:none}
+.dial:active{cursor:grabbing}
+.dial svg{width:100%;height:100%}
+.meter{border:1px solid var(--line);border-radius:8px;background:var(--bg1);padding:12px}
+.meter-read{font-size:26px;color:var(--green);letter-spacing:3px;text-shadow:0 0 10px rgba(95,227,161,.6);margin-bottom:8px}
+.meter-read small{font-size:11px;color:var(--dim)}
+.carrier-btns{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
+/* окно находки */
+.found-banner{border:1px solid var(--green);color:var(--green);background:rgba(95,227,161,.08);border-radius:6px;padding:8px 12px;font-size:11px;letter-spacing:2px;margin-bottom:12px}
+.dossier-notice{border:1px solid var(--line);border-left:3px solid var(--green);background:rgba(95,227,161,.06);border-radius:6px;padding:10px 12px;margin:12px 0}
+.dossier-notice>b{display:block;color:var(--green);font-size:11px;letter-spacing:1.5px;margin-bottom:8px;font-weight:normal}
+.dn-row{display:flex;justify-content:space-between;gap:10px;font-size:11.5px;padding:4px 0;border-top:1px dashed rgba(95,227,161,.2)}
+.dn-row:first-of-type{border-top:none}
+.dn-char{color:var(--txt)}
+.dn-title{color:var(--dim);font-style:italic}
+/* фикс перехвата кликов декоративной графикой */
+/* Декоративные элементы комнаты не должны перехватывать клики */
+#sceneSvg .f, #sceneSvg .ff, #sceneSvg .fd, #sceneSvg .fl, #sceneSvg .ghost, #sceneSvg .slab { pointer-events: none; }
+/* Группа зоны и её рамка ловят клики */
+#sceneSvg .zone { cursor: pointer; }
+#sceneSvg .zone .zbox { pointer-events: auto; cursor: pointer; }
+/* А текст внутри зоны не должен мешать клику */
+#sceneSvg .zone .zlab, #sceneSvg .zone .zmark { pointer-events: none; }.itemSvg .part{pointer-events:none}
+.itemSvg .part *{pointer-events:none}
+.itemSvg .part .pbox{pointer-events:all;cursor:pointer}
+.puzzle-svg .pf,.puzzle-svg .pff,.puzzle-svg .pfd,.puzzle-svg .ptxt,.puzzle-svg .plab,.puzzle-svg .wire{pointer-events:none}
+.puzzle-svg .socket{pointer-events:none}
+.puzzle-svg .socket *{pointer-events:none}
+.puzzle-svg .socket circle{pointer-events:all;cursor:pointer}
+@media (max-width:1150px){
+  main{grid-template-columns:270px minmax(0,1fr)}
+  #right{position:fixed;top:58px;right:0;bottom:0;width:min(380px,92vw);z-index:40;transform:translateX(105%);transition:.25s;border-radius:0}
+  body.jr-open #right{transform:none}body.jr-open .scrim{display:block}#btnJournal{display:inline-block}
+}
+@media (max-width:900px){
+  .item-grid{grid-template-columns:1fr}.item-info{min-height:0}
+  .carrier-grid{grid-template-columns:1fr}.dial{width:190px;height:190px}
+  .pcards{grid-template-columns:repeat(2,1fr)}
+}
+@media (max-width:820px){
+  main{grid-template-columns:minmax(0,1fr)}
+  #left{position:fixed;top:58px;left:0;bottom:0;width:min(320px,90vw);z-index:40;transform:translateX(-105%);transition:.25s;border-radius:0;overflow-y:auto}
+  body.map-open #left{transform:none}body.map-open .scrim{display:block}#btnMap{display:inline-block}
+  .brand span{display:none}.hcount{display:none}header{gap:6px;padding:0 8px}.btn{padding:6px 8px;font-size:10px}
+}
+</style>
+</head>
+<body>
+<div id="sky"></div><div class="aurora"></div><canvas id="snow"></canvas>
+<div id="grain"></div><div id="scan"></div><div id="vig"></div>
+<div id="app">
+  <header>
+    <div class="brand"><b>МЕРИДИАН-7</b><span>ПОЛЯРНАЯ НОЧЬ · ЗИМА 1984 · СУТКИ 19 БЕЗ СВЯЗИ</span></div>
+    <span class="hcount">НАХОДКИ <b id="cClues">0/18</b></span>
+    <span class="hcount">СВЯЗИ <b id="cDed">0/11</b></span>
+    <span class="hcount">ПРИБОРЫ <b id="cPuzzles">0/3</b></span>
+    <button class="btn" id="btnSound">♪ ЗВУК: ВКЛ</button>
+    <button class="btn" id="btnMap">КАРТА</button>
+    <button class="btn" id="btnJournal">ЖУРНАЛ</button>
+    <button class="btn" id="btnCmp">СОПОСТАВИТЬ</button>
+    <button class="btn" id="btnHelp">?</button>
+    <button class="btn" id="btnSettings">НАСТРОЙКИ</button>
+    <button class="btn btn-accent" id="btnFinale">ФИНАЛ</button>
+  </header>
+  <main>
+    <aside id="left">
+      <div class="panel">
+        <div class="p-head"><span class="dot"></span>СХЕМА СТАНЦИИ</div>
+        <div class="p-body" style="padding:8px"><svg id="mapSvg" viewBox="0 0 320 470" role="img" aria-label="Схема станции"></svg></div>
+        <div class="legend"><span>● вы</span><span style="color:var(--teal)">▣ осмотрено</span><span style="color:var(--amber)">🔒 заперто</span></div>
+      </div>
+      <div class="panel obj"><div class="p-head">ТЕКУЩАЯ ЗАДАЧА</div><div class="p-body" id="objective"></div></div>
+      <div class="panel status"><div class="p-head">СИСТЕМЫ</div><div class="p-body">
+        ДГ-12: <b>НОМИНАЛ</b><br>ТОПЛИВО: <b>61%</b><br>T НАРУЖИ: <b>−47 °C</b><br>ВЕТЕР: <b>22 м/с, С-В</b><br>СВЯЗЬ: <span class="bad">НЕТ</span><br>ЛЮДИ НА БОРТУ: <span class="bad">1 из 6</span>
+      </div></div>
+    </aside>
+    <section id="center">
+      <div class="panel" id="locHead"><div class="p-body"><h2 id="locName"></h2><p id="locDesc"></p></div></div>
+      <div class="panel" id="sceneWrap"><svg id="sceneSvg" viewBox="0 0 640 360"></svg></div>
+      <div class="panel" id="inspect"><div class="p-head">ОСМОТР</div><div class="p-body" id="inspBody"><p class="hint">Выберите светящуюся зону на схеме комнаты. Осмотренные зоны отмечаются галочкой — к ним можно вернуться.</p></div></div>
+    </section>
+    <aside id="right" class="panel">
+      <div class="tabs">
+        <button class="tab on" data-tab="clues">УЛИКИ <span id="tClues"></span></button>
+        <button class="tab" data-tab="doss">ДОСЬЕ</button>
+        <button class="tab" data-tab="ded">СВЯЗИ <span id="tDed"></span></button>
+      </div>
+      <div class="p-body" id="jrBody"></div>
+      <div id="cmpBar"><div class="selnames" id="selNames">Выберите две улики для сопоставления.</div><button class="btn btn-accent" id="btnCompare" style="width:100%" disabled>СОПОСТАВИТЬ УЛИКИ</button></div>
+    </aside>
+  </main>
+</div>
+<div class="scrim" id="scrim"></div><div id="modalRoot"></div><div id="toasts"></div>
+<div id="start"><div class="start-card">
+  <div class="st">НАУЧНЫЙ РЕТРОДЕТЕКТИВ</div><h1>МЕРИДИАН-7</h1>
+  <div class="sub">АНТАРКТИДА · ЗИМА 1984 · ОДИН ПРОТИВ тишины</div>
+  <div class="intro">
+    <p>Вы — Андрей Ключников, инженер автоматики. Последнее, что вы помните: буровая, треск льда, вспышка — и жар. Вы очнулись в медпункте станции «Меридиан-7». Дизель гудит. Людей нет.</p>
+    <p>Пятеро коллег исчезли девятнадцать дней назад. Связи с Большой землёй нет. Осмотрите станцию, соберите улики, сопоставьте их — и решите, что здесь произошло.</p>
+    <p style="color:var(--dim)">Мышь · без таймеров · прогресс сохраняется автоматически.</p>
+  </div>
+  <div class="start-btns"><button class="btn btn-accent btn-big" id="btnContinue" style="display:none">ПРОДОЛЖИТЬ</button><button class="btn btn-green btn-big" id="btnNew">НОВАЯ ИГРА</button></div>
+</div></div>
+
+<script>
+"use strict";
+/* ===== ОСНОВНЫЕ ДАННЫЕ ===== */
+const CLUES={
+ map:{n:"Медицинская карта №06/К",w:"Медпункт · кровать №1",c:"✚",d:"Пациент: Ключников А. В. Диагноз: закрытая ЧМТ, общее переохлаждение II ст. Поступил 03.07 в 22:40, доставлен с буровой. Назначения: постельный режим, седация по схеме — «по согласованию с нач. станции». Последние дни отмечены ровным почерком Соколовой: «сон медикаментозный, пробуждение нежелательно». В графе «поведение до травмы»: «требовал остановить бурение, конфликтовал с нач. станции»."},
+ sed:{n:"Пузырёк аминазина",w:"Медпункт · медицинский шкаф",c:"✚",d:"Тёмное стекло, этикетка выцвела. Осталось на донышке. На обороте этикетки карандашом: «12 дней, по схеме». Кто-то рассчитал курс ровно до определённой даты — не до выздоровления."},
+ note:{n:"Записка под подушкой",w:"Медпункт · тумбочка",c:"✎",d:"Сложенный вчетверо лист, почерк Соколовой: «Андрей. Прости. Везти тебя было нельзя — дорога убьёт тебя за первые сутки. Через двенадцать дней после этой записки включи передатчик: 8190 кГц, 04:00. Тебя услышат. Я просила их вернуться. Я просила. — И. С.» Дата на листке — день исчезновения экипажа."},
+ amb:{n:"Амбулаторный журнал",w:"Медпункт · стойка с журналами",c:"✚",d:"01.07 — Гурьев С. П., рваная рана левой ладони, 9 швов, напильник, столбняк профилактирован. 03.07 — Ключников А. В., ЧМТ, переохлаждение. 04.07 — осмотры отменены «в связи с отъездом». Последняя запись сделана утром того дня, в который станция опустела."},
+ beds:{n:"Нетронутые личные вещи",w:"Жилой блок · каюты экипажа",c:"⌂",d:"Пять коек заправлены. На полках — книги, бритвы, очки Ковалёва, шаль Соколовой. У людей, бегущих в панике, такое не остаётся. У людей, уезжающих навсегда по плану, остаётся всё, что нельзя унести в тёплом мешке."},
+ photo:{n:"Фотография первой зимовки",w:"Жилой блок · каюта Северова",c:"▣",d:"Чёрно-белый снимок: шестеро у флага, станция «Восток-1», 1962. Молодой Северов — крайний справа. На обороте выцветшими чернилами: «17.04.1962. День, когда я остался жив. В. С.»"},
+ anketa:{n:"Анкета личного состава",w:"Радиорубка · папка «Личный состав»",c:"▤",d:"Северов Виктор Андреевич. Род. 1930. Начальник дрейфующей станции «Восток-1» с апреля 1962-го, первая зимовка — 17.04.1962. В графе «особые отметки»: «допуск к работам по объекту „Ласточка“, форма 2». Остальные графы стандартны и скучны, как всё, что люди пишут о себе официально."},
+ cipher:{n:"Шифротелеграмма №0417",w:"Радиорубка · журнал входящих",c:"▤",d:"Принята 28.06, расшифрована Северовым лично: «ОБЪЕКТ ЛАСТОЧКА ЗАКРЫТЬ ТЧК ДАННЫЕ ИЗЪЯТЬ ТЧК ЛИЧНЫЙ СОСТАВ ВЫВЕЗТИ МАРШРУТ КЛИН ТЧК СВЯЗЬ ЧЕРЕЗ БОРТ СЛАВА ОКНА ПО ГРАФИКУ ТЧК МОЛЧАНИЕ ТЧК». Ниже — пометка карандашом: «К. — транспортировка запрещена. Решать на месте.»"},
+ tape:{n:"Магнитофонная плёнка №7",w:"Радиорубка · архив плёнок",c:"♪",d:"Бобина подписана «внутр., 02.07». На записи — спор в кают-компании за два дня до исчезновения экипажа. Расшифровка прилагается."},
+ outlog:{n:"Журнал исходящих сеансов",w:"Радиорубка · стол радиста",c:"▤",d:"Июль. Сеансы с позывным «Слава-2»: 04:00 и 16:00, частота 8190 кГц, ежедневно. Напротив каждого — подпись Северова «согласовано». Последний сеанс — 04.07, 04:12: «Группа вышла. Груз по описи. Один остался. Ждём борт по графику». «Один остался» подчёркнуто дважды."},
+ whale:{n:"Снимок с китобоя",w:"Радиорубка · у иллюминатора",c:"▣",d:"Ковалёв в штормовке на палубе «Славы», лето прошлого года, зубастая улыбка, банка тушёнки в руке. На обороте: «Паша договорился — ретрансляция через борт. Дешевле, чем спутник, и свои. В. С.» Снимок приколочен кнопкой на виду — как шутка. Или как алиби."},
+ core:{n:"Отчёт по керну №112",w:"Лаборатория · кернохранилище",c:"⚙",d:"Керн с глубины 214 м: трещины, рассолы, включения солёного льда. Вывод Одинцовой, подчёркнуто трижды: «Несущая способность массива недостаточна для ледового ВПП. Строительство объекта „Ласточка“ невозможно. Подделка данных исключена». На полях чужой карандаш: «Вера, подумай о людях. Подпись убери.» Её ответ: «Лёд не врёт. В.»"},
+ fuel:{n:"Топливный журнал ДГ-12",w:"Дизельная · пульт генератора",c:"⚙",d:"Июнь–июль. 30.06: «прогрев генератора — 400 л». Четыреста литров на прогрев — столько ДГ-12 не съест и за месяц. Страница аккуратно вырезана лезвием, корешок хранит оттиск цифры «4» и частицу слова «…ХАРЬ…». Почерк Гурьева, но нажим чужой — писали под диктовку."},
+ blood:{n:"Окровавленная ветошь",w:"Дизельная · верстак",c:"⚠",d:"Промасленная тряпка, бурая от крови — много крови, как кажется сначала. Рядом напильник с сорванной насечкой и тиски с зажатой алюминиевой деталью. Кровь на ветоши и на рукояти — и ни капли больше нигде в дизельной. Так не выглядит место убийства. Так выглядит место, где человек поранился и чертыхался."},
+ key:{n:"Ключ от ангара",w:"Дизельная · шкаф инструментов",c:"⚿",key:true,d:"Тяжёлый латунный ключ на проволочном кольце, бирка «АНГАР/2». Ангар заперт снаружи — единственный замок на станции, который Гурьев вешал сам. Значит, уезжали через ангар. И значит, кто-то очень хотел, чтобы внутрь заглянули в последнюю очередь."},
+ manifest:{n:"Опись вывезенного",w:"Склад · стеллажи провизии",c:"▤",d:"Накладная от 04.07: «Вывезено: штормовые комплекты — 5, спальные мешки — 5, НЗ-1 — 5, медикаменты походные — 1, документация объекта — 2 ящика. Оставлено: НЗ-30 (один потребитель), ДГ-12, топливо по норме, медикаменты стационарные». Пять комплектов. Не шесть. И тридцать суток автономии — для одного."},
+ route:{n:"Походный журнал Гурьева",w:"Ангар · верстак",c:"▤",d:"Блокнот в мазутных пятнах, чистовик ушёл с рейсом. «03.07, 23:10. Харьковчанка готова. 400 л в основной и прицеп, расход 1,3 л/км, плечо 142 км, точка КЛИН, рандеву со Славой 05.07, 12:00. Обратным ходом не вернёмся: борт принимает всех у берега. Ключникова не берём — Соколова сказала: умрёт в дороге. Начальник решил. Я против. Я подчинился.» Последняя строка продавлена пером почти до дыры."},
+ packet:{n:"Пакет «Тихий берег»",w:"Кабинет начальника · сейф",c:"▤",d:"Серая папка, гриф срезан ножом. Внутри: директива о закрытии объекта «Ласточка»; предписание об изъятии и уничтожении первичных данных; маршрут эвакуации «Клин»; список личного состава — пять фамилий, шестая (Ключников) вычеркнута с припиской: «Нетранспортабелен. Оставить. Обеспечить автономность 30 сут. Связь по графику. Заключение врача прилагается». Заключение Соколовой: «Перевозка исключена. Шанс пережить дорогу — ноль. Шанс переждать на станции — есть». Подпись Северова — размашистая, злая."}
+};
+const PAIRS=[
+ {a:"map",b:"sed",id:"d_sleep",t:"Двенадцать дней сна",x:"Соколова держала вас в медикаментозном сне по схеме, рассчитанной ровно до даты отъезда. Вас не забыли разбудить — вас не будили намеренно."},
+ {a:"note",b:"outlog",id:"d_window",t:"Окно спасения",x:"Записка и журнал сходятся до минуты: 8190 кГц, 04:00, борт «Слава». Ваш выход на связь — часть плана, а не случайность."},
+ {a:"photo",b:"anketa",id:"d_code",t:"Дата, которую он носит с собой",x:"17.04.1962 — день, когда Северов «остался жив». Четыре цифры, которые он хранит двадцать два года. Код кабинета: 1704.",unlock:"office"},
+ {a:"fuel",b:"route",id:"d_fuel",t:"Четыреста литров на «Харьковчанку»",x:"Списание на «прогрев» — подделка. Топливо ушло в рейс до точки «Клин», 142 километра к берегу."},
+ {a:"amb",b:"blood",id:"d_blood",t:"Кровь — Гурьева",x:"Девять швов на ладони, напильник, за два дня до отъезда. Дизельная видела травму, а не убийство."},
+ {a:"beds",b:"manifest",id:"d_plan",t:"Уезжали по плану",x:"Пять тёплых комплектов, нетронутые личные вещи, тридцать суток автономии для одного. Это не паника и не бегство — это вывоз людей и намеренно оставленный человек."},
+ {a:"cipher",b:"core",id:"d_motive",t:"Причина закрытия",x:"Керн №112 доказал: ледовый аэродром невозможен. «Ласточку» похоронили собственные данные станции — и приказали стереть следы."},
+ {a:"whale",b:"cipher",id:"d_whale",t:"«Слава» — не покупатель, а почтальон",x:"Сеансы Ковалёва санкционированы директивой: ретрансляция окон связи. Радист не торговал тайнами — он держал канал."},
+ {a:"tape",b:"fuel",id:"d_tape",t:"Ссора — о топливе для рейса",x:"Гурьев спорил не о бунте: он требовал резерв для генератора, чтобы оставленный человек не замёрз. Его «я против» — о том, чтобы вас не бросать."},
+ {a:"note",b:"packet",id:"d_leave",t:"Вас оставили по бумаге",x:"Приказ вычеркнул шестую фамилию; врач подписала «шанс переждать — есть» и нарушила приказ единственным человеческим способом — запиской и лекарством."},
+ {a:"packet",b:"cipher",id:"d_packet",t:"«Тихий берег» — имя операции",x:"Директива №0417 и пакет из сейфа — одно и то же решение: закрыть объект, вывезти людей, замести следы."}
+];
+const LOCS={
+ med:{n:"МЕДПУНКТ",d:"Стерильный холод, запах спирта и озона. Здесь вы очнулись. Кровать №1 ещё хранит тепло вашего тела.",
+  scene:'<rect class="fd" x="8" y="8" width="624" height="344" rx="8"/><line class="fl" x1="8" y1="300" x2="632" y2="300"/><rect class="ff" x="45" y="200" width="170" height="80" rx="6"/><rect class="f" x="52" y="206" width="40" height="26" rx="4"/><line class="f" x1="45" y1="240" x2="215" y2="240"/><rect class="ff" x="325" y="95" width="100" height="185" rx="4"/><line class="f" x1="375" y1="120" x2="375" y2="160"/><line class="f" x1="355" y1="140" x2="395" y2="140"/><line class="fd" x1="325" y1="180" x2="425" y2="180"/><line class="fd" x1="325" y1="230" x2="425" y2="230"/><rect class="ff" x="475" y="150" width="110" height="130" rx="4"/><line class="fd" x1="475" y1="185" x2="585" y2="185"/><line class="fd" x1="475" y1="220" x2="585" y2="220"/><circle class="f" cx="530" cy="72" r="28"/><circle class="fd" cx="530" cy="72" r="22"/><line class="f" x1="230" y1="120" x2="230" y2="200"/><circle class="f" cx="230" cy="115" r="8"/><text class="slab" x="40" y="330">МЕДПУНКТ // СЕКТОР А-1</text>',
+  zones:[
+   {id:"med_bed",x:40,y:190,w:185,h:105,l:"Кровать №1",clue:"map",text:["Ваша кровать. Простыня смята, ремень фиксации расстёгнут изнутри — вы встали сами. Под матрасом — планшет с медицинской картой."]},
+   {id:"med_cab",x:318,y:88,w:115,h:200,l:"Медицинский шкаф",clue:"sed",text:["Бинты, йод, ампулы. Полка «седативные» почти пуста — кто-то забрал курс целиком, оставив один пузырёк как свидетельство."]},
+   {id:"med_night",x:228,y:238,w:70,h:58,l:"Тумбочка",clue:"note",text:["Тумбочка у изголовья. Стакан с высохшим дном, термометр — и сложенный вчетверо листок, засунутый под подушку. Вам. Лично."]},
+   {id:"med_stand",x:468,y:140,w:125,h:150,l:"Стойка с журналами",clue:"amb",text:["Амбулаторный журнал на стойке. Соколова вела его до последнего утра. Почерк ровный до самой последней строки."]},
+   {id:"med_port",x:495,y:38,w:75,h:70,l:"Иллюминатор",text:["За стеклом — ночь длиной в зиму. Ветер несёт снег горизонтально. Минус сорок семь. Отсюда до берега — сто сорок два километра темноты."]}
+  ]},
+ live:{n:"ЖИЛОЙ БЛОК",d:"Пять заправленных коек, пять жизней на полках. Кают-компания хранит запах табака и недосказанных слов.",
+  scene:'<rect class="fd" x="8" y="8" width="624" height="344" rx="8"/><line class="fl" x1="8" y1="300" x2="632" y2="300"/><rect class="ff" x="35" y="130" width="190" height="42" rx="4"/><rect class="ff" x="35" y="185" width="190" height="42" rx="4"/><rect class="ff" x="35" y="240" width="190" height="42" rx="4"/><rect class="f" x="42" y="136" width="34" height="20" rx="3"/><rect class="f" x="42" y="191" width="34" height="20" rx="3"/><rect class="f" x="42" y="246" width="34" height="20" rx="3"/><rect class="ff" x="255" y="210" width="150" height="70" rx="4"/><circle class="f" cx="290" cy="230" r="8"/><circle class="f" cx="330" cy="245" r="8"/><rect class="ff" x="255" y="95" width="110" height="75" rx="4"/><path class="f" d="M300 95 L320 60 L340 95"/><rect class="ff" x="435" y="95" width="170" height="185" rx="4"/><line class="f" x1="435" y1="150" x2="605" y2="150"/><circle class="f" cx="590" cy="200" r="5"/><circle class="fd" cx="520" cy="60" r="24"/><text class="slab" x="40" y="330">ЖИЛОЙ БЛОК // 5 КОЕК</text>',
+  zones:[
+   {id:"live_bunks",x:28,y:120,w:205,h:170,l:"Каюты экипажа",clue:"beds",text:["Вы открываете одну тумбу, вторую, третью. Вещи на местах. Люди не бежали — люди уехали, оставив здесь всё лишнее."]},
+   {id:"live_cabin",x:428,y:88,w:185,h:200,l:"Каюта Северова",clue:"photo",text:["Каюта начальника: устав, кружка, портсигар. За рамкой зеркала — старая фотография, вставленная лицом к стене. Почему лицом к стене?"]},
+   {id:"live_mess",x:248,y:200,w:165,h:95,l:"Кают-компания",text:["На стене календарь: крестики до 4 июля, дальше — пустота. На столе недопитый чай, плёнка заела в радиоле. Здесь спорили за два дня до отъезда. Плёнка №7 должна быть в радиорубке."]},
+   {id:"live_gram",x:248,y:88,w:125,h:85,l:"Радиола",text:["Патефон с заевшей пластинкой. Вы снимаете иглу — треск стихает. Тишина оказывается громче музыки. На полке пустое гнездо с табличкой «архив — радиорубка»."]}
+  ]},
+ radio:{n:"РАДИОРУБКА",d:"Сердце станции, которое молчит девятнадцать суток. Р-250 тёплый на ощупь — кто-то держал его в готовности.",
+  scene:'<rect class="fd" x="8" y="8" width="624" height="344" rx="8"/><line class="fl" x1="8" y1="300" x2="632" y2="300"/><rect class="ff" x="35" y="120" width="160" height="170" rx="4"/><circle class="f" cx="70" cy="155" r="12"/><circle class="f" cx="110" cy="155" r="12"/><circle class="f" cx="150" cy="155" r="12"/><line class="fd" x1="45" y1="190" x2="185" y2="190"/><line class="fd" x1="45" y1="215" x2="185" y2="215"/><line class="fd" x1="45" y1="240" x2="185" y2="240"/><line class="f" x1="115" y1="120" x2="115" y2="40"/><circle class="fd" cx="115" cy="34" r="6"/><circle class="fd" cx="115" cy="34" r="14"/><rect class="ff" x="230" y="115" width="130" height="60" rx="3"/><rect class="ff" x="230" y="205" width="130" height="70" rx="3"/><rect class="ff" x="395" y="100" width="100" height="120" rx="4"/><circle class="f" cx="420" cy="135" r="14"/><circle class="f" cx="465" cy="135" r="14"/><circle class="fd" cx="420" cy="135" r="4"/><circle class="fd" cx="465" cy="135" r="4"/><rect class="ff" x="525" y="195" width="90" height="85" rx="3"/><rect class="f" x="528" y="65" width="80" height="90" rx="2"/><text class="slab" x="40" y="330">РАДИОРУБКА // Р-250 · 8190?</text>',
+  zones:[
+   {id:"rad_tx",x:28,y:110,w:175,h:190,l:"Передатчик Р-250",sp:"tuner",text:["Передатчик в режиме приёма. Шкала частот — 5000–9000 кГц. Эфир живёт треском — но где-то в нём есть окна. Попробуйте настроиться и послушать."]},
+   {id:"rad_out",x:223,y:105,w:145,h:75,l:"Журнал исходящих",clue:"outlog",text:["Журнал исходящих сеансов. Ковалёв писал аккуратно, как отличник. Последняя запись обрывается на полуслове — или на самом важном слове."]},
+   {id:"rad_in",x:223,y:195,w:145,h:90,l:"Журнал входящих",clue:"cipher",text:["Журнал входящих. Одна телеграмма за весь июль — шифровка. Северов расшифровал её сам и оставил лист в журнале. Небрежность? Или приглашение?"]},
+   {id:"rad_tapes",x:388,y:92,w:115,h:135,l:"Архив плёнок",clue:"tape",sp:"tape",text:["Бобины пронумерованы. №7 подписана «внутр., 02.07» и стоит отдельно от остальных — как улика, которую спрятали на виду."]},
+   {id:"rad_folder",x:518,y:188,w:100,h:100,l:"Папка «Личный состав»",clue:"anketa",text:["Папка с анкетами экипажа. Северов хранил её в радиорубке, а не в кабинете. Странно. Или расчётливо."]},
+   {id:"rad_snap",x:520,y:58,w:95,h:100,l:"Снимок у иллюминатора",clue:"whale",text:["Фотография приколена кнопкой прямо над пультом. Ковалёв на палубе китобоя «Слава». Кто-то очень хотел, чтобы этот снимок видели."]}
+  ]},
+ lab:{n:"ЛАБОРАТОРИЯ",d:"Керны, шлифы, микроскоп. Здесь лёд рассказывал правду — и кто-то приказал ему замолчать.",
+  scene:'<rect class="fd" x="8" y="8" width="624" height="344" rx="8"/><line class="fl" x1="8" y1="300" x2="632" y2="300"/><path class="f" d="M60 280 L110 90 L160 280"/><line class="f" x1="80" y1="220" x2="140" y2="220"/><line class="f" x1="92" y1="170" x2="128" y2="170"/><line class="f" x1="110" y1="90" x2="110" y2="60"/><rect class="ff" x="255" y="100" width="170" height="180" rx="4"/><line class="fd" x1="265" y1="140" x2="415" y2="140"/><line class="fd" x1="265" y1="180" x2="415" y2="180"/><line class="fd" x1="265" y1="220" x2="415" y2="220"/><line class="f" x1="270" y1="132" x2="410" y2="132"/><line class="f" x1="270" y1="172" x2="410" y2="172"/><line class="f" x1="270" y1="212" x2="410" y2="212"/><rect class="ff" x="465" y="180" width="140" height="100" rx="4"/><path class="f" d="M500 160 L500 120 L520 105 L535 120"/><circle class="f" cx="528" cy="140" r="10"/><rect class="ff" x="465" y="65" width="140" height="70" rx="4"/><text class="slab" x="40" y="330">ЛАБОРАТОРИЯ // КЕРН №112</text>',
+  zones:[
+   {id:"lab_core",x:248,y:90,w:185,h:200,l:"Кернохранилище",clue:"core",text:["Стеллаж с кернами. Гнездо №112 пусто — сам керн утилизирован, но отчёт остался. Одинцова не выбросила бумагу. Бумага — это и есть улика."]},
+   {id:"lab_drill",x:35,y:70,w:180,h:220,l:"Буровая установка",text:["Здесь вас нашли. Станок остыл, трос оборван, на площадке — тёмное пятно вашей крови и следы волочения к медпункту. Травма случилась до исчезновения экипажа. Это важно."]},
+   {id:"lab_desk",x:458,y:170,w:155,h:120,l:"Стол Одинцовой",text:["Черновик письма, не отправленного: «…не подпишу подделку. Пусть закрывают, но лёд не врёт…» Дальше текст вычеркнут. Она знала, что её данные кого-то разорят."]},
+   {id:"lab_micro",x:458,y:58,w:155,h:85,l:"Микроскоп",text:["Шлифы льда под стеклом: кристаллы, рассолы, микротрещины. Красота, которая приговорила секретный проект. Вера смотрела на это часами — и не солгала."]}
+  ]},
+ diesel:{n:"ДИЗЕЛЬНАЯ",d:"ДГ-12 дышит ровно, как спящий зверь. Топливо, кровь и вырезанная страница — три истории в одной комнате.",
+  scene:'<rect class="fd" x="8" y="8" width="624" height="344" rx="8"/><line class="fl" x1="8" y1="300" x2="632" y2="300"/><rect class="ff" x="240" y="120" width="200" height="160" rx="8"/><circle class="f" cx="280" cy="160" r="14"/><circle class="f" cx="330" cy="160" r="14"/><circle class="f" cx="380" cy="160" r="14"/><line class="f" x1="240" y1="200" x2="440" y2="200"/><path class="f" d="M440 150 L480 150 L480 110"/><rect class="ff" x="490" y="100" width="115" height="180" rx="10"/><ellipse class="f" cx="547" cy="100" rx="57" ry="12"/><line class="fd" x1="500" y1="180" x2="595" y2="180"/><rect class="ff" x="35" y="190" width="160" height="90" rx="4"/><line class="f" x1="50" y1="215" x2="120" y2="215"/><rect class="ff" x="35" y="65" width="160" height="85" rx="4"/><line class="fd" x1="115" y1="65" x2="115" y2="150"/><text class="slab" x="40" y="330">ДИЗЕЛЬНАЯ // ДГ-12 · 61%</text>',
+  zones:[
+   {id:"die_engine",x:232,y:110,w:215,h:180,l:"Дизель-генератор ДГ-12",clue:"fuel",text:["Генератор работает на холостых — станция берегла топливо для одного. На пульте лежит топливный журнал. Кто-то вырезал из него страницу, но корешок разговорчив."]},
+   {id:"die_bench",x:28,y:180,w:175,h:110,l:"Верстак",clue:"blood",text:["Тиски, стружка, напильник с сорванной насечкой. И ветошь, бурая от крови. Сердце пропускает удар — но осмотритесь: кровь только здесь, у тисков."]},
+   {id:"die_tools",x:28,y:58,w:175,h:100,l:"Шкаф инструментов",clue:"key",text:["Шкаф Гурьева: ключи по биркам, всё на своих местах. Кроме одного крючка — «АНГАР/2». Сам ключ висит на гвозде внутри дверцы. Механик оставил его вам нарочно?"]},
+   {id:"die_tank",x:482,y:88,w:130,h:200,l:"Топливная цистерна",text:["Мерная линейка: 61%. Следы перелива у горловины — свежие, июльские. Отсюда ушли сотни литров. Вопрос — куда: в генератор или в бак вездехода?"]}
+  ]},
+ store:{n:"СКЛАД",d:"Провизия, ящики объекта, печь. Здесь считают не вещи, а сутки — и людей.",
+  scene:'<rect class="fd" x="8" y="8" width="624" height="344" rx="8"/><line class="fl" x1="8" y1="300" x2="632" y2="300"/><rect class="ff" x="35" y="80" width="210" height="200" rx="4"/><line class="fd" x1="35" y1="130" x2="245" y2="130"/><line class="fd" x1="35" y1="180" x2="245" y2="180"/><line class="fd" x1="35" y1="230" x2="245" y2="230"/><rect class="f" x="50" y="95" width="40" height="28"/><rect class="f" x="105" y="95" width="40" height="28"/><rect class="f" x="160" y="145" width="40" height="28"/><rect class="f" x="60" y="195" width="40" height="28"/><rect class="ff" x="285" y="160" width="160" height="120" rx="4"/><line class="f" x1="285" y1="200" x2="445" y2="200"/><line class="f" x1="365" y1="160" x2="365" y2="280"/><rect class="ff" x="490" y="190" width="110" height="90" rx="6"/><path class="f" d="M545 190 L545 100 L590 100"/><circle class="f" cx="545" cy="235" r="16"/><text class="slab" x="40" y="330">СКЛАД // НЗ-30: ОДИН ПОТРЕБИТЕЛЬ</text>',
+  zones:[
+   {id:"sto_shelves",x:28,y:70,w:225,h:220,l:"Стеллажи провизии",clue:"manifest",text:["Накладная приколота к стеллажу. Пять штормовых комплектов вывезено. НЗ-30 оставлен — с пометкой «один потребитель». Кто-то посчитал ваши сутки заранее."]},
+   {id:"sto_crates",x:278,y:150,w:175,h:140,l:"Ящики объекта",text:["Ящики с маркировкой «ЛАСТОЧКА», гриф срезан. Пусто — документация вывезена двумя ящиками. Что за объект требует такой секретности на научной станции? Ответ — в керне и в шифровке."]},
+   {id:"sto_stove",x:482,y:180,w:125,h:110,l:"Печь-буржуйка",text:["В золе — обугленные обрывки с машинописью: «…транспортировка противоре…», «…остальным обеспечить…». Кто-то жёг бумаги здесь. Копии? Или черновики приказа? Подлинник ищите у начальника."]}
+  ]},
+ hangar:{n:"АНГАР",d:"Ворота приоткрыты ровно настолько, чтобы вышла «Харьковчанка». Пустое место машины — как вырванный зуб.",
+  locked:true,lockMsg:"Ангар заперт. Нужен ключ — ищите там, где хранят инструмент.",
+  scene:'<rect class="fd" x="8" y="8" width="624" height="344" rx="8"/><line class="fl" x1="8" y1="300" x2="632" y2="300"/><rect class="ghost" x="130" y="130" width="280" height="130" rx="14"/><rect class="ghost" x="330" y="100" width="80" height="60" rx="8"/><circle class="ghost" cx="180" cy="270" r="24"/><circle class="ghost" cx="260" cy="270" r="24"/><circle class="ghost" cx="350" cy="270" r="24"/><rect class="ff" x="455" y="160" width="150" height="120" rx="4"/><line class="f" x1="470" y1="190" x2="540" y2="190"/><rect class="ff" x="35" y="190" width="70" height="90" rx="8"/><ellipse class="f" cx="70" cy="190" rx="35" ry="8"/><rect class="ff" x="455" y="45" width="150" height="80" rx="4"/><line class="fd" x1="530" y1="45" x2="530" y2="125"/><path class="fd" d="M130 300 L60 330 M410 300 L480 330"/><text class="slab" x="40" y="345">АНГАР // ХАРЬКОВЧАНКА: ВЫШЛА 04.07</text>',
+  zones:[
+   {id:"han_bay",x:120,y:95,w:300,h:200,l:"Место «Харьковчанки»",text:["Масляное пятно ещё свежее. Колея гусениц уходит к воротам — одна машина, один прицеп. Пять тёплых комплектов в кабине и спальнике. Шестого места не было."]},
+   {id:"han_bench",x:448,y:150,w:165,h:140,l:"Верстак Гурьева",clue:"route",text:["Верстак механика: инструмент убран, стружка сметена — человек уходил надолго. Под прессом — блокнот в мазутных пятнах. Походный журнал. Чистовик он увёз, черновик — вам."]},
+   {id:"han_drums",x:28,y:180,w:85,h:110,l:"Топливные бочки",text:["Бочки из-под солярки: пломбы сорваны, сухо. Четыреста литров. Столько же, сколько списано на «прогрев генератора» в дизельной. Совпадение? Нет — арифметика."]},
+   {id:"han_gate",x:448,y:38,w:165,h:95,l:"Ворота",text:["Замок ангара висел снаружи — Гурьев запер станцию за собой. Ворота открывали изнутри, значит, уезжали организованно, а не бежали. Навесной замок цел — ключ остался на станции."]}
+  ]},
+ office:{n:"КАБИНЕТ НАЧАЛЬНИКА",d:"Комната, где решали за вас. Кодовый замок хранил не деньги — решение.",
+  locked:true,lockMsg:"Кодовый замок. Четыре цифры. Что-то личное для Северова.",
+  scene:'<rect class="fd" x="8" y="8" width="624" height="344" rx="8"/><line class="fl" x1="8" y1="300" x2="632" y2="300"/><rect class="ff" x="130" y="180" width="230" height="100" rx="4"/><rect class="f" x="150" y="160" width="60" height="20" rx="3"/><circle class="f" cx="320" cy="170" r="10"/><rect class="ff" x="40" y="160" width="70" height="120" rx="8"/><rect class="ff" x="470" y="160" width="130" height="120" rx="4"/><circle class="f" cx="535" cy="215" r="18"/><line class="f" x1="535" y1="215" x2="548" y2="205"/><rect class="ff" x="130" y="45" width="230" height="100" rx="3"/><path class="f" d="M150 120 L220 90 L300 100 L340 70"/><circle class="f" cx="340" cy="70" r="5"/><text class="slab" x="145" y="60">ОПЕРАЦИЯ // МАРШРУТ «КЛИН»</text><text class="slab" x="40" y="330">КАБИНЕТ // СЕЙФ ОТКРЫТ</text>',
+  zones:[
+   {id:"off_safe",x:462,y:150,w:145,h:140,l:"Сейф",clue:"packet",text:["Сейф не заперт — Северов уезжал в спешке или оставил открытым нарочно. Внутри одна папка. Серая. С срезанным грифом. Всё, что от вас прятали, — здесь."]},
+   {id:"off_desk",x:122,y:150,w:245,h:140,l:"Письменный стол",text:["Пепельница, портсигар, недописанное письмо: «…если меня спросят, я скажу, что выполнял приказ. Но это я решил. Андрея мы оставили. Я буду помнить об этом каждый…» Дальше строка обрывается. Перо продавило бумагу насквозь."]},
+   {id:"off_map",x:122,y:38,w:245,h:110,l:"Карта операции",text:["На стене — карта побережья с маршрутом: М-7 → точка «Клин», 142 км. Рандеву с судном отмечено крестом и датой 05.07. Это не научная экспедиция. Это эвакуация."]}
+  ]}
+};
+const CHARS=[
+ {id:"severov",n:"Виктор Северов",r:"НАЧАЛЬНИК СТАНЦИИ · 54",p:"Второй десяток зимовок. Жёсткий, немногословный. Привык решать за всех — и платить за решения одиночеством.",recs:[
+   {req:"photo",t:"Первая зимовка",x:"«17.04.1962. День, когда я остался жив». Он хранит эту дату как оберег — и как пароль. Человек, который однажды выжил, боится смерти больше других."},
+   {req:"cipher",t:"Директива",x:"Шифротелеграмму он расшифровал лично. «МОЛЧАНИЕ» — последнее слово приказа. Он принял его как присягу."},
+   {req:"packet",t:"Подпись",x:"Подпись под вычеркнутой фамилией — размашистая, злая. Он не прятал её. Он знал, что кто-то однажды прочтёт."}]},
+ {id:"sokolova",n:"Ирина Соколова",r:"ВРАЧ · 41",p:"Точная, усталая. Совесть станции. Привыкла спасать любой ценой — даже ценой послушания.",recs:[
+   {req:"map",t:"Почерк врача",x:"«Сон медикаментозный, пробуждение нежелательно». Она писала это ровно, без помарок. Так пишут не диагноз, а приговор себе."},
+   {req:"sed",t:"Схема сна",x:"Курс аминазина рассчитан на 12 дней — ровно до отъезда. Она усыпляла вас не ради лечения. Ради того, чтобы вы не увидели, как уезжают остальные."},
+   {req:"note",t:"Записка",x:"«Я просила их вернуться. Я просила.» Дважды. Она нарушила приказ единственным способом, который ей оставили, — словом и лекарством."}]},
+ {id:"guryev",n:"Степан Гурьев",r:"МЕХАНИК · 47",p:"Золотые руки, вспыльчивый характер. Спорит до хрипоты, подчиняется до скрипа. Не умеет лгать бумаге.",recs:[
+   {req:"amb",t:"Швы",x:"Рваная рана ладони, 9 швов, напильник. За два дня до отъезда. Кровь в дизельной — его собственная, оставленная в ремонте, а не в драке."},
+   {req:"tape",t:"Спор",x:"«Кому ты продаёшь этот рейс, начальник?» Он требовал резерв топлива для генератора — для вас. Его крик был защитой, а не угрозой."},
+   {req:"route",t:"«Я против. Я подчинился.»",x:"Последняя строка продавлена пером до дыры. Он вёз людей к берегу и оставлял вас за спиной — и записал это, потому что не смог не записать."}]},
+ {id:"kovalev",n:"Павел Ковалёв",r:"РАДИСТ · 26",p:"Дерзкий, ловит всё подряд — от погоды до чужих тайн. Улыбается как человек, у которого всегда есть запасной канал.",recs:[
+   {req:"whale",t:"«Слава»",x:"Снимок с китобоя приколот на виду. «Паша договорился — ретрансляция через борт». Это не компромат. Это алиби, которое он оставил вам нарочно."},
+   {req:"outlog",t:"Окна",x:"04:00 и 16:00, 8190 кГц, каждый день, «согласовано». Он держал канал открытым до последней минуты — и подчеркнул «один остался» дважды, чтобы вы поняли."},
+   {req:"tape",t:"Голос в эфире",x:"«Виктор Андреич! „Слава“ дала окно на четверг!» — его голос на плёнке. Он не прятал связь с судном. Он ею гордился."}]},
+ {id:"odintsova",n:"Вера Одинцова",r:"ГЛЯЦИОЛОГ · 33",p:"Упрямая до одержимости. Верит льду больше, чем людям. Её честность стоила станции будущего.",recs:[
+   {req:"core",t:"Керн №112",x:"«Лёд не врёт. В.» — ответ на просьбу убрать подпись. Она могла спасти проект одной правкой. Не стала. Из-за этого станцию закрыли — и из-за этого вас оставили: спешка не ждала больных."},
+   {req:"cipher",t:"«Подумай о людях»",x:"Чужой карандаш на полях её отчёта: «Вера, подумай о людях. Подпись убери». Она подумала — и оставила подпись. Люди и лёд оказались по разные стороны."}]},
+ {id:"hero",n:"Андрей Ключников",r:"ИНЖЕНЕР АВТОМАТИКИ · 38 · ВЫ",p:"Вы. Провал в памяти после травмы на буровой. Единственный оставшийся человек — и единственный свидетель.",recs:[
+   {req:"map",t:"Кто я",x:"«Требовал остановить бурение, конфликтовал с нач. станции». Вы были против ещё до травмы. Значит, вы были правы ещё до того, как вас усыпили."},
+   {req:"note",t:"Почему я",x:"Дорога убила бы вас за сутки. Врач подписала «шанс переждать — есть». Вас оставили не потому, что вы лишний. Потому что вы — единственный, кого нельзя было везти."}]}
+];
+const VERSIONS=[
+ {id:"truth",n:"ОПЕРАЦИЯ «ТИХИЙ БЕРЕГ»",d:"Экипаж вывезли по секретной директиве. Начальник скрыл операцию, а меня оставили как нетранспортабельного. Виновен Северов, исполнявший приказ."},
+ {id:"murder",n:"КРОВАВЫЙ ДИЗЕЛЬ",d:"Механик Гурьев перебил экипаж из-за топлива и сбежал на вездеходе. Кровь в дизельной и ссора на плёнке — улики."},
+ {id:"self",n:"ПРОВАЛ В ПАМЯТИ",d:"Это сделал я — в приступе после травмы. Экипаж скрыл следы из жалости и ушёл. «Прости» в записке — обращено ко мне."}
+];
+const TRUE_CHAIN=["cipher","core","packet","note"];
+const ENDINGS={
+ truth:{type:"true",label:"ИСТИННАЯ КОНЦОВКА",t:"ТИХИЙ БЕРЕГ",ps:[
+  "04:00. Вы включаете передатчик и набираете 8190. Эфир трещит, как лёд под ногой. Через сорок секунд — голос: «Меридиан-7, это Слава-2. Приняли. Ждите борт». Вы садитесь на пол радиорубки и впервые за девятнадцать суток дышите.",
+  "Через восемь суток приходит борт. Вы уже знаете всё. «Ласточка» — секретный ледовый аэродром, который станция должна была обеспечивать. Керн №112 Одинцовой доказал: лёд не выдержит. Москву устроила только тишина — директива №0417 приказала закрыть объект, изъять данные и вывезти людей на точку «Клин», к «Славе». Пять тёплых комплектов. Вычеркнутая шестая фамилия.",
+  "Северов выполнял приказ — и решил за вас. Соколова подписала «шанс переждать — есть» и оставила записку, лекарство и частоту. Гурьев спорил за вас до хрипоты и подчинился. Ковалёв держал окно связи до последней минуты. Одинцова не подделала лёд. Каждый из них оставил вам кусочек правды — как хлебные крошки сквозь полярную ночь.",
+  "Вы — единственный, кто знает всё. В рапорте можно написать «эвакуация по погодным условиям» — и вас поймут. Можно написать правду — и кого-то спишут со счетов навсегда. Лёд не врёт. Люди — иногда. Рапорт пишете вы."]},
+ murder:{type:"alt",label:"АЛЬТЕРНАТИВНАЯ КОНЦОВКА",t:"КРОВАВЫЙ ДИЗЕЛЬ",ps:[
+  "Вы отправляете рапорт: убийца — механик Гурьев. Мотив — топливо. Улики — кровь в дизельной, ссора на плёнке, вырезанная страница. Версия сходится быстро и удобно, как всё неправдивое.",
+  "Рапорт принимают без вопросов. Удобный виновный всегда удобен. Дело закрывают за отсутствием фигуранта: Гурьев «скрылся в неизвестном направлении». Вы получаете перевод на материк и папку с грифом «хранить вечно».",
+  "Весной вам приходит письмо с речного парохода. Почерк Гурьева, мазутные пятна: «Андрей, я жив. Рука зажила, шрам на ладони — девять швов, напильник, помнишь? Начальник знал, что я против. Спроси его сам». Вы перечитываете письмо трижды. Кровь в дизельной была его. Спор был о вас.",
+  "Станция хранит тишину. Вы выбрали версию, в которой не нужно думать о приказах, о вычеркнутых фамилиях, о двенадцати днях сна. Тишина согласилась с вами. Это и есть самое страшное."]},
+ self:{type:"alt",label:"АЛЬТЕРНАТИВНАЯ КОНЦОВКА",t:"ПРОВАЛ В ПАМЯТИ",ps:[
+  "Вы складываете версию, в которой виноваты вы: провал памяти, агрессия в медицинской карте, кровь, «прости» в записке врача. Экипаж скрыл следы из жалости и ушёл, не сумев сказать правду в глаза. Вы отправляете признание в эфир — на любую частоту.",
+  "Эфир молчит. Вы ждёте ареста, следствия, людей в форме. Зима длится. Вы чините генератор, топите печь, ведёте журнал — и каждый день подписываетесь под своим признением, как под приговором.",
+  "Весной приходит борт. Станция в порядке. Журналы в порядке. Люди — живы, у берега, у всех семьи и работа. Никто не пришёл вас арестовывать. Никто не искал пропавших. Все были живы — и все молчали. Это было хуже всего.",
+  "Вы остались зимовать с единственной версией, в которой виноваты вы. Лёд под станцией — ровный, солёный, честный. Честнее всего, что вы о себе решили. Весной вы попросите перевода. И ещё долго будете вздрагивать от слова «прости»."]}
+};
+const FAIL_HINTS=[
+ "Эти предметы молчат друг о друге. Ищите общее: дату, имя, место, цифру.",
+ "Связи нет. Одна улика говорит о человеке, другая — о вещи. Совпадения не случилось.",
+ "Пусто. Попробуйте пару, где обе улики касаются одного события.",
+ "Не то. Документы спорят с документами только о цифрах и датах — проверьте их."
+];
+
+/* ===== РАСШИРЕНИЯ ===== */
+Object.assign(CLUES,{
+ engraving:{n:"Гравировка портсигара",w:"Кабинет · портсигар (осмотр предмета)",c:"▣",d:"На крышке портсигара — тонкая гравировка: «В.С. · 17.04.1962 · второй день рождения». Металл стёрт у даты большим пальцем. Северов носил эту дату при себе — и открывал портсигар чаще, чем курил."},
+ burn:{n:"Обгоревший черновик приказа",w:"Склад · печь (реконструкция «до»)",c:"▤",d:"Восстановлено по уцелевшим углам и оттиску на золе: «…транспортировка противоре… остальным обеспечить… Ключников… оставить…». Это черновик того же решения, что лежит в сейфе. Кто-то жёг копии в печи — но бумага легла неровно, и край уцелел."},
+ cards:{n:"Перфокарта-аномалия 30.06",w:"Склад · счётный стол (головоломка)",c:"▤",d:"Среди перфокарт ежедневных сводок одна карта датирована 30.06, но пробивка не погодная: «ГСМ 400 · ХАРЬКОВЧАНКА · КЛИН». Ковалёв готовил сводки для материка; эту карту он не отправил — оставил в считывателе. Топливный журнал солгал, перфокарта — нет."},
+ carrier:{n:"Контрольная несущая 8190",w:"Радиорубка · Р-250 (ловля несущей)",c:"♪",d:"Вы поймали несущую вручную: стрелка на максимуме, в наушниках — ровный тон и позывные «СЛАВА-2 … ОКНО … 04:00». Канал не мёртв. Окно, о котором писала Соколова, действительно существует — и кто-то держит его открытым."},
+ circuit_tag:{n:"Сервисная бирка Р-250",w:"Радиорубка · клеммная панель (головоломка)",c:"⚙",d:"Под клеммной панелью — жестяная бирка: «03.07, 21:40. Питание передатчика переведено на резерв. Автономный режим — 30 суток. Ковалёв.» Резерв включили за день до отъезда. Станцию готовили не к смерти, а к ожиданию."},
+ seal:{n:"Оттиск сургучной пломбы",w:"Кабинет · сейф (реконструкция «до»)",c:"▣",d:"На пломбе сейфа — оттиск: «ОБЪЕКТ ЛАСТОЧКА · СЕКТОР 2 · М-7». Сургуч свежий на вид, но дата оттиска — июнь. Пакет «Тихий берег» пришёл на станцию запечатанным и ушёл из сейфа уже вскрытым. Кто-то читал приказ раньше, чем экипаж узнал о нём."}
+});
+PAIRS.push(
+ {a:"engraving",b:"photo",id:"d_case",t:"Одна дата на двух предметах",x:"Фотография и гравировка портсигара называют одну дату: 17.04.1962. Для Северова это не просто воспоминание — это пароль, который он носит при себе. Код кабинета: 1704."},
+ {a:"burn",b:"packet",id:"d_burn",t:"Сожжённый черновик — копия решения",x:"Обгоревший лист из печи и пакет из сейфа говорят об одном решении: оставить Ключникова и обеспечить ему тридцать суток. Черновик жгли не чтобы скрыть убийство, а чтобы скрыть приказ."},
+ {a:"cards",b:"fuel",id:"d_cards",t:"Перфокарта подтверждает подделку",x:"Перфокарта от 30.06 пробита как расход топлива на «Харьковчанку», а топливный журнал в тот же день списывает 400 литров на «прогрев». Перфокарта не врёт — врёт журнал."},
+ {a:"carrier",b:"note",id:"d_carrier",t:"Окно живо",x:"Пойманная несущая совпадает с частотой из записки Соколовой. Окно связи не выдумка врача и не случайность — кто-то действительно держит канал открытым."},
+ {a:"circuit_tag",b:"tape",id:"d_power",t:"Резерв включён до отъезда",x:"Бирка Ковалёва и спор на плёнке складываются в одну картину: за день до отъезда передатчик перевели на резервное питание, чтобы оставленный человек смог выйти на связь. Гурьев спорил именно об этом резерве."},
+ {a:"seal",b:"cipher",id:"d_seal",t:"Пломба объекта «Ласточка»",x:"Оттиск сургуча и шифротелеграмма принадлежат одной секретной линии: объект «Ласточка», сектор 2. Приказ пришёл на станцию опечатанным и был вскрыт до отъезда."}
+);
+LOCS.store.zones.push({id:"sto_cards",x:282,y:52,w:165,h:88,l:"Счётный стол",puzzle:"cards",text:["Счётный стол радиста: считыватель перфокарт, лоток для сводок, карандаш. Ковалёв готовил здесь ежедневные сводки для материка. Карты лежат не по порядку — кто-то просматривал их в спешке."]});
+LOCS.store.scene+='<rect class="ff" x="288" y="62" width="150" height="70" rx="4"/><line class="f" x1="300" y1="82" x2="420" y2="82"/><line class="fd" x1="300" y1="100" x2="420" y2="100"/><text class="slab" x="292" y="128">СЧЁТНЫЙ СТОЛ</text>';
+CHARS.find(c=>c.id==="severov").recs.push(
+ {req:"engraving",t:"Второй день рождения",x:"Гравировка на портсигаре повторяет дату с фотографии. Он носил её при себе двадцать два года — и сделал паролем от кабинета."},
+ {req:"seal",t:"Пломба объекта",x:"Сургуч с оттиском «Ласточка · сектор 2» — след секретного делопроизводства. Северов знал о закрытии объекта раньше экипажа."}
+);
+CHARS.find(c=>c.id==="sokolova").recs.push({req:"burn",t:"Черновик",x:"В печи жгли не улики убийства, а черновик приказа. Соколова могла сжечь копию, чтобы её не прочли раньше времени. Но край листа уцелел — и в нём осталось ваше имя."});
+CHARS.find(c=>c.id==="guryev").recs.push({req:"cards",t:"Перфокарта 30.06",x:"Перфокарта фиксирует расход топлива на «Харьковчанку». Гурьев не мог подделать пробивку — её делал считыватель. Поэтому вырезали страницу журнала, а карту оставили в считывателе."});
+CHARS.find(c=>c.id==="kovalev").recs.push(
+ {req:"carrier",t:"Несущая",x:"Вы поймали несущую вручную. Ковалёв оставил передатчик в готовности — и кто-то на том конце держит окно открытым. Он не бросал вас в эфире."},
+ {req:"circuit_tag",t:"Резерв",x:"Бирка с его подписью: питание переведено на резерв за день до отъезда. Это не предательство. Это тридцать суток автономии, оставленные вам как шанс."}
+);
+const CLUE_ORDER=Object.keys(CLUES);
+const TOTAL_CLUES=CLUE_ORDER.length,TOTAL_PAIRS=PAIRS.length,TOTAL_PUZZLES=3;
+
+const ZONE_ITEMS={rad_tx:"radio_set",rad_tapes:"tape_recorder",off_desk:"cigarette_case",die_engine:"fuel_book",sto_stove:"stove",off_safe:"safe"};
+const ITEMS={
+ radio_set:{
+  title:"Передатчик Р-250",sub:"Радиорубка · лицевая панель · 1979 г.в.",
+  times:["СЕЙЧАС","РЕКОНСТРУКЦИЯ · 04.07, 04:12"],
+  draw(t,f){let s='<rect class="iff" x="30" y="30" width="660" height="360" rx="10"/><rect class="ifd" x="50" y="50" width="620" height="320" rx="6"/>';
+   s+='<line class="if" x1="90" y1="50" x2="70" y2="12"/><circle class="ifd" cx="68" cy="10" r="6"/><text class="ilab" x="95" y="24">АНТЕННА · ШТЫРЬ</text>';
+   s+='<rect class="iff" x="200" y="70" width="330" height="70" rx="4"/><line class="if" x1="220" y1="115" x2="510" y2="115"/>';
+   for(let i=0;i<=10;i++){const x=220+i*29;s+='<line class="ifd" x1="'+x+'" y1="'+(i%5?108:102)+'" x2="'+x+'" y2="122"/>';}
+   s+='<text class="ilab" x="220" y="90">5000</text><text class="ilab" x="480" y="90">9000</text>';
+   s+='<rect class="iff" x="65" y="165" width="95" height="80" rx="6"/><line class="if" x1="112" y1="205" x2="'+(f.power?135:90)+'" y2="'+(f.power?180:230)+'"/><circle class="if" cx="112" cy="205" r="7"/><text class="ilab" x="68" y="260">ПИТАНИЕ '+(f.power?"ВКЛ":"ВЫКЛ")+'</text>';
+   s+='<rect class="iff" x="200" y="190" width="210" height="140" rx="6"/>';
+   for(let i=0;i<6;i++){s+='<circle class="if" cx="'+(230+(i%3)*70)+'" cy="'+(225+Math.floor(i/3)*70)+'" r="12"/>';}
+   s+='<text class="ilab" x="210" y="350">КЛЕММНАЯ ПАНЕЛЬ</text>';
+   s+='<circle class="iff" cx="545" cy="255" r="72"/><circle class="ifd" cx="545" cy="255" r="52"/><line class="if" x1="545" y1="255" x2="545" y2="205"/><text class="ilab" x="480" y="350">ВАЛ НАСТРОЙКИ</text>';
+   if(t===1){s+='<rect class="iam" x="300" y="70" width="120" height="70" rx="4"/><text class="ilab" x="306" y="62">ОТМЕТКА У 8190</text><rect class="iff" x="455" y="300" width="180" height="55" rx="4"/><text class="ilab" x="462" y="292">КЛЮЧ МОРЗЕ</text><circle class="iglow" cx="112" cy="180" r="5"/>';}
+   return s;},
+  parts:[
+   [{id:"antenna",x:50,y:8,w:150,h:55,l:"Антенна",a:{type:"info",title:"Антенна",text:"Штырь погнут у основания, но цел. Передатчик мог работать. Его не вывели из строя — его выключили."}},
+    {id:"power",x:60,y:160,w:105,h:105,l:"Тумблер",a:{type:"flag",flag:"power",title:"Тумблер питания",text:"Вы щёлкаете тумблером. Панель оживает: стрелки дрогнули, шкала подсветилась. Резервная линия под напряжением. Теперь можно собирать цепь и ловить несущую."}},
+    {id:"scale",x:195,y:65,w:340,h:80,l:"Шкала",a:{type:"info",title:"Шкала частот",text:"Шкала размечена от 5000 до 9000 кГц. У правого края — свежая царапина возле цифры 8190. Кто-то часто возвращался к этой частоте."}},
+    {id:"terminals",x:195,y:185,w:220,h:170,l:"Клеммы · цепь",a:{type:"puzzle",puzzle:"circuit",title:"Клеммная панель"}},
+    {id:"dial",x:465,y:175,w:160,h:180,l:"Вал настройки",a:{type:"puzzle",puzzle:"carrier",title:"Вал настройки"}}],
+   [{id:"mark",x:295,y:62,w:130,h:85,l:"Отметка у 8190",a:{type:"note",clue:"outlog",note:"mark8190",title:"Отметка на шкале",text:"В реконструкции последнего сеанса шкала стоит на 8190 кГц. Царапина свежая. Ковалёв выставил частоту перед уходом и оставил её готовой — вам оставалось только включить питание."}},
+    {id:"key",x:450,y:295,w:190,h:65,l:"Ключ Морзе",a:{type:"info",title:"Ключ Морзе",text:"Ключ придвинут к краю стола. На рукояти — следы пальцев в машинном масле. Последним на нём работал не Ковалёв: масло с верстака Гурьева."}},
+    {id:"lamp",x:60,y:160,w:105,h:105,l:"Лампа резерва",a:{type:"info",title:"Лампа резерва",text:"Лампа горела ровно. Резерв был включён заранее и держал передатчик живым все девятнадцать суток."}}]
+  ]},
+ tape_recorder:{
+  title:"Магнитофон «Электроника»",sub:"Радиорубка · архив плёнок · бобина №7",
+  times:["СЕЙЧАС","РЕКОНСТРУКЦИЯ · 02.07"],
+  draw(t,f){let s='<rect class="iff" x="40" y="40" width="640" height="340" rx="10"/><rect class="ifd" x="60" y="60" width="600" height="300" rx="6"/>';
+   s+=f.lid?'<rect class="iam" x="170" y="75" width="380" height="150" rx="8"/><text class="ilab" x="175" y="68">КРЫШКА ОТКИНУТА</text>':'<rect class="iff" x="170" y="75" width="380" height="150" rx="8"/><text class="ilab" x="175" y="68">КАССЕТНАЯ КРЫШКА</text>';
+   s+='<circle class="if" cx="270" cy="150" r="52"/><circle class="if" cx="450" cy="150" r="52"/><circle class="ifd" cx="270" cy="150" r="14"/><circle class="ifd" cx="450" cy="150" r="14"/>';
+   s+='<rect class="iff" x="175" y="265" width="45" height="45" rx="4"/><rect class="iff" x="230" y="265" width="45" height="45" rx="4"/><rect class="iff" x="285" y="265" width="45" height="45" rx="4"/><rect class="iff" x="340" y="265" width="45" height="45" rx="4"/>';
+   s+='<text class="ilab" x="175" y="330">ЗАПИСЬ</text><text class="ilab" x="232" y="330">ВОСПР.</text><text class="ilab" x="292" y="330">СТОП</text><text class="ilab" x="345" y="330">ПЕРЕМ.</text>';
+   s+='<rect class="iff" x="430" y="265" width="110" height="45" rx="4"/><text class="itxt" x="448" y="294">0417</text><text class="ilab" x="430" y="330">СЧЁТЧИК</text>';
+   s+='<circle class="if" cx="590" cy="287" r="18"/><text class="ilab" x="560" y="330">НАУШНИКИ</text>';
+   if(t===1){s+='<rect class="iam" x="175" y="80" width="120" height="55" rx="4"/><text class="ilab" x="180" y="72">ПЛОМБА</text><text class="itxt" x="330" y="105">ВНУТР. 02.07</text>';}
+   return s;},
+  parts:[
+   [{id:"lid",x:165,y:70,w:390,h:160,l:"Крышка",a:{type:"flag",flag:"lid",title:"Кассетная крышка",text:"Крышка откинута с сухим щелчком. Под ней — бобина №7, заправленная в тракт. Кто-то оставил плёнку готовой к прослушиванию."}},
+    {id:"reels",x:205,y:95,w:300,h:115,l:"Бобины",a:{type:"info",needFlag:"lid",needText:"Бобины закрыты крышкой. Сначала откройте крышку.",title:"Бобины",text:"Плёнка №7 заправлена петлёй, концы склеены. Запись делали не для архива — для того, чтобы её нашли."}},
+    {id:"buttons",x:170,y:260,w:220,h:75,l:"Кнопки",a:{type:"playtape",title:"Кнопки управления",text:"Вы нажимаете «ВОСПР.». Механизм щёлкает, плёнка идёт. Запись та же — спор в кают-компании. Магнитофон исправен, головка чистая. Им пользовались до последнего дня."}},
+    {id:"counter",x:425,y:260,w:120,h:75,l:"Счётчик",a:{type:"note",clue:"tape",note:"counter0417",title:"Счётчик ленты",text:"Счётчик остановлен на 0417 — номер директивы о закрытии объекта. Совпадение? Ковалёв мог сбросить счётчик на любом значении. Он выбрал это."}},
+    {id:"jack",x:565,y:260,w:80,h:75,l:"Гнездо",a:{type:"info",title:"Гнездо наушников",text:"В гнезде — переходник на старые наушники. Кто-то слушал плёнку один, в наушниках, чтобы не разбудить станцию."}}],
+   [{id:"seal",x:170,y:75,w:130,h:65,l:"Пломба",a:{type:"note",clue:"tape",note:"seal0207",title:"Пломба на крышке",text:"В момент записи крышка была опечатана пластилиновой пломбой. Так помечали плёнки «внутренние». Спор записали официально — как доказательство для себя, а не для начальства."}},
+    {id:"label",x:320,y:90,w:220,h:80,l:"Надпись",a:{type:"info",title:"Надпись на бобине",text:"«Внутр., 02.07». Почерк Ковалёва, но буква «В» с нажимом — так писал Гурьев, когда торопился. Возможно, плёнку подписывали вдвоём."}}]
+  ]},
+ cigarette_case:{
+  title:"Портсигар Северова",sub:"Кабинет · письменный стол · серебро, 1962",
+  times:["СЕЙЧАС","РЕКОНСТРУКЦИЯ · 04.07"],
+  draw(t,f){let s='<rect class="iff" x="170" y="90" width="380" height="250" rx="14"/>';
+   if(f.lid||t===1){s+='<rect class="iam" x="170" y="60" width="380" height="60" rx="10"/><rect class="ifd" x="195" y="145" width="330" height="160" rx="8"/>';
+    for(let i=0;i<5;i++)s+='<rect class="if" x="'+(215+i*58)+'" y="165" width="22" height="120" rx="10"/>';
+    s+='<text class="ilab" x="195" y="330">СОДЕРЖИМОЕ</text>';
+   }else{s+='<line class="if" x1="170" y1="150" x2="550" y2="150"/><text class="ilab" x="195" y="120">КРЫШКА ЗАКРЫТА</text>';}
+   s+='<text class="itxt" x="240" y="200">В.С.</text><text class="itxt" x="240" y="225">17.04.1962</text><text class="ilab" x="240" y="250">ВТОРОЙ ДЕНЬ РОЖДЕНИЯ</text>';
+   if(t===1){s+='<path class="iam" d="M185 105 L230 95 L260 110"/><text class="ilab" x="180" y="80">ВМЯТИНА</text><text class="ilab" x="360" y="330">ПАПИРОСЫ ВЫНУТЫ</text>';}
+   return s;},
+  parts:[
+   [{id:"lid",x:165,y:85,w:390,h:70,l:"Крышка",a:{type:"flag",flag:"lid",title:"Крышка портсигара",text:"Крышка открывается с мягким скрипом. Петля разработана — портсигар открывали часто, задумчиво, машинально."}},
+    {id:"engraving",x:220,y:180,w:280,h:80,l:"Гравировка",a:{type:"clue",clue:"engraving",title:"Гравировка",text:"Под большим пальцем металл стёрт до матовости. Дата 17.04.1962 читается без труда. Северов носил её при себе двадцать два года."}},
+    {id:"contents",x:195,y:270,w:330,h:60,l:"Содержимое",a:{type:"info",needFlag:"lid",needText:"Крышка закрыта. Содержимое не видно.",title:"Содержимое",text:"Пять папирос и сложенный вчетверо листок с пометкой «окна связи». Северов курил мало, но держал при себе расписание, как держат билет на поезд."}}],
+   [{id:"dent",x:175,y:80,w:120,h:60,l:"Вмятина",a:{type:"info",title:"Вмятина на крышке",text:"Вмятина свежая, с загнутым краем. Портсигар ударили о стол — в сердцах. Так делают, когда решение принято и обратного хода нет."}},
+    {id:"empty",x:195,y:145,w:330,h:160,l:"Ложементы",a:{type:"info",title:"Ложементы",text:"Папиросы вынуты, остался только листок с расписанием. Перед отъездом Северов забрал табак, но оставил частоты. Случайность? Нет — он оставлял их вам."}},
+    {id:"engraving2",x:220,y:315,w:280,h:40,l:"Гравировка",a:{type:"clue",clue:"engraving",title:"Гравировка",text:"Та же дата, тот же износ. В reconstruction портсигар выглядит так, как выглядел в день отъезда."}}]
+  ]},
+ fuel_book:{
+  title:"Топливный журнал ДГ-12",sub:"Дизельная · пульт генератора · июнь–июль 1984",
+  times:["СЕЙЧАС · страница вырезана","ДО · 30.06 · страница на месте"],
+  draw(t,f){let s='<rect class="iff" x="70" y="60" width="580" height="310" rx="6"/><line class="if" x1="150" y1="60" x2="150" y2="370"/><text class="ilab" x="80" y="90">КОРЕШОК</text>';
+   if(t===0){s+='<rect class="ifd" x="170" y="80" width="450" height="270" rx="4"/><path class="iam" d="M170 140 L620 140"/><text class="ilab" x="180" y="130">ЛИНИЯ РЕЗА</text><rect class="iff" x="170" y="80" width="450" height="50" rx="4"/><text class="itxt" x="185" y="112">30.06 · ПРОГРЕВ · 400 Л</text><text class="ilab" x="180" y="170">СТРАНИЦА УДАЛЕНА</text><text class="ilab" x="180" y="200">КОРЕШОК: …ХАРЬ…</text>';
+   }else{s+='<rect class="iff" x="170" y="80" width="450" height="270" rx="4"/><text class="itxt" x="185" y="115">30.06 · ХАРЬКОВЧАНКА</text><text class="itxt" x="185" y="145">ЗАПРАВКА · 400 Л</text><text class="itxt" x="185" y="175">МАРШРУТ · КЛИН</text><text class="itxt" x="185" y="205">ПОДПИСЬ · ГУРЬЕВ</text><rect class="iam" x="430" y="100" width="160" height="60" rx="4"/><text class="ilab" x="440" y="90">ШТАМП</text><rect class="iam" x="430" y="260" width="160" height="60" rx="4"/><text class="ilab" x="440" y="250">ПОДПИСЬ</text>';}
+   return s;},
+  parts:[
+   [{id:"spine",x:70,y:60,w:80,h:310,l:"Корешок",a:{type:"info",title:"Корешок",text:"Корешок хранит оттиск цифры «4» и частицу слова «…ХАРЬ…». Страницу вырезали острым лезвием, ровно, без спешки."}},
+    {id:"stub",x:165,y:75,w:460,h:60,l:"Остаток записи",a:{type:"note",clue:"fuel",note:"cutline",title:"Линия реза",text:"Рез идёт по линейке, от корешка к краю. Так режут не в ярости, а по решению. Страницу удалили, чтобы скрыть назначение расхода, а не сам расход."}},
+    {id:"cover",x:165,y:150,w:460,h:200,l:"Обложка",a:{type:"info",title:"Обложка",text:"На обложке — инвентарный номер ДГ-12 и дата начала журнала. Журнал вели аккуратно до 30.06. После — вырезанная страница и ровные записи до 04.07."}}],
+   [{id:"page",x:165,y:75,w:460,h:200,l:"Полная запись",a:{type:"note",clue:"fuel",note:"rebuild3006",title:"Восстановленная запись",text:"Вы восстанавливаете страницу по оттиску и памяти о расходе: «30.06 · Харьковчанка · 400 л · маршрут Клин». Топливный журнал в его нынешнем виде лжёт. Реконструкция возвращает правду."}},
+    {id:"stamp",x:425,y:95,w:170,h:70,l:"Штамп",a:{type:"info",title:"Штамп",text:"Штамп «УТВЕРЖДАЮ» стоит поверх записи. Утверждал не Гурьев — почерк нажима Северова. Механик писал под диктовку."}},
+    {id:"sign",x:425,y:255,w:170,h:70,l:"Подпись",a:{type:"info",title:"Подпись",text:"Подпись Гурьева продавлена пером. Он ставил её после долгого спора — и оставил перфокарту как свидетель того, что расход был не на прогрев."}}]
+  ]},
+ stove:{
+  title:"Печь-буржуйка и бумаги",sub:"Склад · зола и уцелевшие края · 04.07",
+  times:["СЕЙЧАС · зола","ДО · 04.07 · бумаги целы"],
+  draw(t,f){let s='<rect class="iff" x="180" y="150" width="300" height="200" rx="10"/><path class="if" d="M330 150 L330 60 L420 60"/><circle class="if" cx="330" cy="245" r="38"/><rect class="ifd" x="200" y="170" width="260" height="160" rx="6"/>';
+   if(t===0){s+='<ellipse class="ifd" cx="330" cy="320" rx="120" ry="22"/><path class="iam" d="M240 300 L280 285 L320 305 L360 288 L410 305"/><text class="ilab" x="210" y="345">ЗОЛА И ОБРЫВКИ</text>';
+   }else{s+='<rect class="iff" x="210" y="185" width="240" height="130" rx="3"/><line class="ifd" x1="225" y1="210" x2="435" y2="210"/><line class="ifd" x1="225" y1="235" x2="435" y2="235"/><line class="ifd" x1="225" y1="260" x2="435" y2="260"/><text class="itxt" x="225" y="205">…ТРАНСПОРТИРОВКА ПРОТИВОПОКАЗАНА…</text><text class="itxt" x="225" y="230">…КЛЮЧНИКОВ… ОСТАВИТЬ…</text><text class="ilab" x="215" y="175">БУМАГИ ДО СОЖЖЕНИЯ</text>';}
+   return s;},
+  parts:[
+   [{id:"ash",x:195,y:290,w:270,h:60,l:"Зола",a:{type:"info",title:"Зола",text:"Зола холодная. Бумаги жгли не ради тепла — ради тишины. Пепел лёг неровно, и края листов уцелели."}},
+    {id:"scrap",x:230,y:275,w:190,h:45,l:"Обрывки",a:{type:"info",title:"Обрывки",text:"Машинопись, обугленные края: «…транспортировка противоре…», «…остальным обеспечить…». Это не личные письма. Это служебный документ."}},
+    {id:"pipe",x:315,y:55,w:120,h:100,l:"Труба",a:{type:"info",title:"Труба",text:"Труба холодная, тяга закрыта. Печь топили последний раз утром 04.07 — перед выходом колонны."}}],
+   [{id:"papers",x:205,y:180,w:250,h:140,l:"Лист приказа",a:{type:"clue",clue:"burn",title:"Лист до сожжения",text:"Вы мысленно восстанавливаете лист по уцелевшим словам и оттиску на золе. Это черновик приказа об оставлении Ключникова. Его сожгли, но бумага оставила след."}},
+    {id:"list",x:210,y:195,w:110,h:110,l:"Список фамилий",a:{type:"info",title:"Список фамилий",text:"Пять фамилий без помарок. Шестая — ваша — вычеркнута. Черновик повторяет сейфовый пакет слово в слово."}},
+    {id:"med",x:340,y:195,w:110,h:110,l:"Заключение врача",a:{type:"info",title:"Заключение врача",text:"«Перевозка исключена. Шанс переждать на станции — есть». Соколова не подписывала смертный приговор. Она подписывала шанс."}}]
+  ]},
+ safe:{
+  title:"Сейф начальника станции",sub:"Кабинет · сейф · пакет «Тихий берег»",
+  times:["СЕЙЧАС · открыт","ДО · 04.07 · заперт"],
+  draw(t,f){let s='<rect class="iff" x="110" y="60" width="500" height="320" rx="8"/><rect class="ifd" x="130" y="80" width="300" height="280" rx="4"/>';
+   if(t===0){s+='<rect class="iam" x="130" y="80" width="300" height="280" rx="4"/><text class="ilab" x="140" y="70">ДВЕРЦА ОТКРЫТА</text><rect class="iff" x="150" y="100" width="260" height="240" rx="4"/><text class="ilab" x="160" y="120">ПОДКЛАДКА</text>';
+   }else{s+='<rect class="iff" x="130" y="80" width="300" height="280" rx="4"/><rect class="iam" x="150" y="100" width="120" height="70" rx="6"/><text class="ilab" x="155" y="90">СУРГУЧНАЯ ПЛОМБА</text><text class="itxt" x="160" y="130">ЛАСТОЧКА</text>';}
+   s+='<circle class="iff" cx="510" cy="180" r="55"/><circle class="ifd" cx="510" cy="180" r="35"/><line class="if" x1="510" y1="180" x2="540" y2="155"/><rect class="iff" x="465" y="280" width="90" height="45" rx="6"/><text class="ilab" x="470" y="350">РУЧКА</text>';
+   return s;},
+  parts:[
+   [{id:"door",x:125,y:75,w:310,h:290,l:"Дверца",a:{type:"info",title:"Дверца",text:"Дверца открыта. Замок не повреждён — сейф открыли своим ключом или кодом. Северов не боялся взлома. Он боялся, что приказ прочтут не те."}},
+    {id:"lining",x:145,y:95,w:270,h:250,l:"Подкладка",a:{type:"note",clue:"packet",note:"lining",title:"Подкладка сейфа",text:"На подкладке — прямоугольный светлый след от папки. Папка лежала здесь всё время до отъезда. Её не прятали в спешке — её оставили на виду после вскрытия."}},
+    {id:"dial",x:450,y:120,w:120,h:120,l:"Диск",a:{type:"info",title:"Кодовый диск",text:"Диск потёрт у четырёх отметок. Северов пользовался им часто. Код от кабинета и код сейфа — одна привычка, одна дата."}}],
+   [{id:"seal",x:145,y:95,w:130,h:80,l:"Пломба",a:{type:"clue",clue:"seal",title:"Сургучная пломба",text:"Пломба цела в реконструкции: «Объект Ласточка · сектор 2 · М-7». Приказ пришёл запечатанным. Кто-то вскрыл его до того, как экипаж узнал о закрытии."}},
+    {id:"dial2",x:450,y:120,w:120,h:120,l:"Диск",a:{type:"info",title:"Кодовый диск",text:"Диск стоит на нуле. Перед отъездом сейф закрыли, но не заперли до конца — Северов оставил вам возможность войти."}},
+    {id:"handle",x:460,y:275,w:100,h:55,l:"Ручка",a:{type:"info",title:"Ручка",text:"Ручка повёрнута на четверть. Замок убран не полностью. Это не небрежность. Это приглашение."}}]
+  ]}
+};
+
+/* ===== ГОЛОВОЛОМКИ ===== */
+const CARD_DATA=[
+ {d:"28.06",k:628,code:"ПОГОДА"},
+ {d:"30.06",k:630,code:"ГСМ 400 · ХАРЬКОВЧАНКА"},
+ {d:"01.07",k:701,code:"ПОГОДА"},
+ {d:"02.07",k:702,code:"СПОР · ЗАПИСЬ"},
+ {d:"03.07",k:703,code:"ТРАВМА КЛЮЧНИКОВА"},
+ {d:"04.07",k:704,code:"ВЫВОЗ · КЛИН"}
+];
+const CARD_INIT=[3,1,5,0,4,2];
+const CIRCUIT_NODES=[
+ {id:"bat",l:"АКБ 24В",x:100,y:100},{id:"sw",l:"ТУМБЛЕР",x:330,y:100},{id:"tx",l:"ПЕРЕДАТЧИК",x:560,y:100},
+ {id:"gnd",l:"ЗЕМЛЯ",x:560,y:280},{id:"gen",l:"ГЕНЕРАТОР",x:100,y:280},{id:"lamp",l:"ЛАМПА",x:330,y:280}
+];
+const CIRCUIT_REQ=[["bat","sw"],["sw","tx"],["tx","gnd"],["gen","lamp"]];
+const PUZZLE_META={
+ circuit:{title:"РЕЗЕРВНОЕ ПИТАНИЕ Р-250",goal:"Соедините клеммы по схеме, напечатанной на крышке прибора. Цепь должна дать питание передатчику и контрольной лампе.",hint:"Схема на крышке: АКБ → ТУМБЛЕР → ПЕРЕДАТЧИК → ЗЕМЛЯ. Отдельная ветка: ГЕНЕРАТОР → ЛАМПА. Нажмите на две клеммы подряд — провод ляжет между ними."},
+ carrier:{title:"ЛОВЛЯ НЕСУЩЕЙ 8190",goal:"Поймайте несущую точной настройкой. Крутите вал мышью или доводите кнопками ±1. Стрелка и писк подскажут близость.",hint:"Если у вас есть записка Соколовой, целевая частота уже известна: 8190 кГц. Если нет — ищите максимум стрелки и самый чистый тон."},
+ cards:{title:"ПЕРФОКАРТЫ СВОДОК",goal:"Разложите перфокарты ежедневных сводок по датам. Правильный порядок откроет аномалию в пробивке.",hint:"Сводки шли на материк ежедневно. Нажмите две карты, чтобы поменять их местами. Ищите карту, где вместо погоды пробито другое."}
+};
+
+/* ===== СОСТОЯНИЕ ===== */
+const SAVE_KEY="meridian7_save_v1",END_KEY="meridian7_endings_v1";
+const defState=()=>({v:1,started:false,introSeen:false,current:"med",found:[],searched:[],ded:[],visited:["med"],unlocked:{hangar:false,office:false},freq:7000,tuned:false,sound:true,attempts:0,
+ items:{},notes:{},puzzles:{circuit:{wires:[],sel:null,solved:false},carrier:{freq:8150,solved:false},cards:{order:CARD_INIT.slice(),sel:null,solved:false}}});
+function load(){try{const r=localStorage.getItem(SAVE_KEY);if(r){const o=JSON.parse(r);if(o&&o.v===1){const d=defState();const m=Object.assign(d,o);m.unlocked=Object.assign(d.unlocked,o.unlocked||{});m.puzzles=Object.assign(d.puzzles,o.puzzles||{});for(const k in d.puzzles)m.puzzles[k]=Object.assign(d.puzzles[k],(o.puzzles||{})[k]||{});m.items=o.items||{};m.notes=o.notes||{};return m;}}}catch(e){}return defState();}
+let S=load();
+let sel=[],chain=[],curVersion=null,curTab="clues",newClueId=null,failIdx=0;
+let activeModalContext=null,clueModalQueue=[],clueModalBusy=false;
+const microtask=window.queueMicrotask?window.queueMicrotask.bind(window):(f)=>Promise.resolve().then(f);
+function save(){try{localStorage.setItem(SAVE_KEY,JSON.stringify(S));}catch(e){}}
+function getEndings(){try{return JSON.parse(localStorage.getItem(END_KEY)||"[]");}catch(e){return[];}}
+function addEnding(id){const e=getEndings();if(!e.includes(id)){e.push(id);try{localStorage.setItem(END_KEY,JSON.stringify(e));}catch(x){}}}
+const has=id=>S.found.includes(id);
+const hasDed=id=>S.ded.includes(id);
+function ist(id){if(!S.items[id])S.items[id]={time:0,parts:[],flags:{},last:null};return S.items[id];}
+function solvedCount(){return Object.keys(S.puzzles).filter(k=>S.puzzles[k].solved).length;}
+
+/* ===== ЗВУК ===== */
+let AC=null,master=null;
+function initAudio(){if(AC)return;try{AC=new (window.AudioContext||window.webkitAudioContext)();master=AC.createGain();master.gain.value=S.sound?0.9:0;master.connect(AC.destination);
+ const buf=AC.createBuffer(1,AC.sampleRate*2,AC.sampleRate),d=buf.getChannelData(0);let l=0;
+ for(let i=0;i<d.length;i++){const w=Math.random()*2-1;l=(l+0.02*w)/1.02;d[i]=l*3.2;}
+ const src=AC.createBufferSource();src.buffer=buf;src.loop=true;
+ const lp=AC.createBiquadFilter();lp.type="lowpass";lp.frequency.value=380;
+ const wg=AC.createGain();wg.gain.value=0.05;
+ const lfo=AC.createOscillator();lfo.frequency.value=0.07;const lg=AC.createGain();lg.gain.value=0.028;lfo.connect(lg);lg.connect(wg.gain);
+ src.connect(lp);lp.connect(wg);wg.connect(master);src.start();lfo.start();
+ const dr=AC.createOscillator();dr.type="sine";dr.frequency.value=46;const dg=AC.createGain();dg.gain.value=0.014;dr.connect(dg);dg.connect(master);dr.start();
+}catch(e){}}
+function tone(f,t0,dur,type,vol){if(!AC)return;const t=AC.currentTime+t0;const o=AC.createOscillator(),g=AC.createGain();o.type=type||"sine";o.frequency.value=f;g.gain.setValueAtTime(0.0001,t);g.gain.exponentialRampToValueAtTime(vol||0.08,t+0.015);g.gain.exponentialRampToValueAtTime(0.0001,t+dur);o.connect(g);g.connect(master);o.start(t);o.stop(t+dur+0.05);}
+function noiseBurst(dur,freq,vol){if(!AC)return;const b=AC.createBuffer(1,Math.max(1,Math.floor(AC.sampleRate*dur)),AC.sampleRate),d=b.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=(Math.random()*2-1)*(1-i/d.length);const s=AC.createBufferSource();s.buffer=b;const f=AC.createBiquadFilter();f.type="bandpass";f.frequency.value=freq;f.Q.value=0.8;const g=AC.createGain();g.gain.value=vol;s.connect(f);f.connect(g);g.connect(master);s.start();}
+const sfx={
+ click(){tone(1150,0,0.05,"square",0.04);},
+ find(){tone(523,0,0.12,"sine",0.09);tone(784,0.1,0.2,"sine",0.09);},
+ ded(){[392,523,659,784].forEach((f,i)=>tone(f,i*0.09,0.18,"sine",0.08));},
+ err(){tone(98,0,0.3,"sawtooth",0.09);},
+ unlock(){noiseBurst(0.14,260,0.2);tone(72,0.02,0.28,"sine",0.16);},
+ static(){noiseBurst(0.9,1700,0.12);},
+ tape(){noiseBurst(5.8,1400,0.05);[0.3,0.7,1.1,1.9,2.5,3.1,3.9,4.5,5.1].forEach(t=>tone(920,t,0.07,"sine",0.05));},
+ radio(){noiseBurst(0.7,1900,0.1);[0.8,1.05,1.3,1.7].forEach(t=>tone(1100,t,0.09,"sine",0.06));},
+ creak(){noiseBurst(0.25,180,0.12);tone(140,0,0.3,"sawtooth",0.05);tone(90,0.1,0.25,"sine",0.06);},
+ beep(st){tone(380+st*760,0,0.09,"sine",0.03+st*0.09);},
+ wire(){tone(660,0,0.05,"square",0.05);tone(990,0.05,0.08,"sine",0.05);},
+ paper(){noiseBurst(0.18,2600,0.06);}
+};
+function setSound(on){S.sound=on;save();if(master)master.gain.value=on?0.9:0;document.getElementById("btnSound").textContent=on?"♪ ЗВУК: ВКЛ":"♪ ЗВУК: ВЫКЛ";}
+document.addEventListener("visibilitychange",()=>{if(!AC)return;if(document.hidden)AC.suspend();else if(S.sound)AC.resume();});
+
+/* ===== СНЕГ ===== */
+const cv=document.getElementById("snow"),cx=cv.getContext("2d");let flakes=[],W=0,H=0;
+function sizeSnow(){const dpr=Math.min(window.devicePixelRatio||1,1.5);W=innerWidth;H=innerHeight;cv.width=W*dpr;cv.height=H*dpr;cv.style.width=W+"px";cv.style.height=H+"px";cx.setTransform(dpr,0,0,dpr,0,0);
+ flakes=Array.from({length:110},()=>({x:Math.random()*W,y:Math.random()*H,r:0.6+Math.random()*2.2,s:0.4+Math.random()*1.4,ph:Math.random()*6.28,a:0.25+Math.random()*0.55}));}
+sizeSnow();addEventListener("resize",sizeSnow);
+let t0=0;function snowLoop(t){requestAnimationFrame(snowLoop);if(document.hidden)return;const dt=Math.min(0.05,(t-t0)/1000||0.016);t0=t;cx.clearRect(0,0,W,H);cx.fillStyle="#dcebf7";
+ for(const f of flakes){f.y+=f.s*60*dt;f.ph+=dt;f.x+=Math.sin(f.ph)*0.4+0.3;if(f.y>H+4){f.y=-4;f.x=Math.random()*W;}if(f.x>W+4)f.x=-4;cx.globalAlpha=f.a;cx.beginPath();cx.arc(f.x,f.y,f.r,0,6.28);cx.fill();}cx.globalAlpha=1;}
+requestAnimationFrame(snowLoop);
+
+/* ===== UI ===== */
+const $=id=>document.getElementById(id);
+function toast(msg,type){const t=document.createElement("div");t.className="toast"+(type?" "+type:"");t.textContent=msg;$("toasts").appendChild(t);setTimeout(()=>{t.style.opacity="0";t.style.transition="opacity .4s";setTimeout(()=>t.remove(),400);},3200);}
+let modalClose=null;
+function showModal(html,opts){opts=opts||{};const root=$("modalRoot");root.className="on";root.innerHTML='<div class="mback"></div><div class="modal'+(opts.wide?" wide":"")+(opts.xwide?" xwide":"")+(opts.cls?" "+opts.cls:"")+'">'+html+"</div>";
+ const close=()=>{root.className="";root.innerHTML="";modalClose=null;activeModalContext=null;if(opts.onClose)opts.onClose();};
+ modalClose=close;root.querySelector(".mback").addEventListener("click",()=>{if(!opts.lock)close();});
+ const x=root.querySelector(".m-x");if(x)x.addEventListener("click",close);return close;}
+document.addEventListener("keydown",e=>{if(e.key==="Escape"&&modalClose)modalClose();});
+function mHead(title){return '<div class="m-head"><span>'+title+'</span><button class="m-x" aria-label="Закрыть">✕</button></div>';}
+function confirmModal(text,onYes,yesLabel){const close=showModal(mHead("ПОДТВЕРЖДЕНИЕ")+'<div class="m-body"><p>'+text+'</p></div><div class="m-foot"><button class="btn" id="cfNo">ОТМЕНА</button><button class="btn btn-danger" id="cfYes">'+(yesLabel||"ПОДТВЕРДИТЬ")+"</button></div>");$("cfNo").onclick=close;$("cfYes").onclick=()=>{close();onYes();};}
+function reopenContext(ctx){if(!ctx)return;if(ctx.type==="item")openItem(ctx.id);else if(ctx.type==="puzzle")openPuzzle(ctx.id,ctx.origin);}
+
+/* ===== КАРТА ===== */
+const MAP_ROOMS=[
+ {id:"med",x:20,y:30,w:120,h:70,l:"МЕДПУНКТ",s:"А-1"},{id:"live",x:160,y:30,w:140,h:90,l:"ЖИЛОЙ БЛОК",s:"А-2"},
+ {id:"radio",x:20,y:130,w:120,h:70,l:"РАДИОРУБКА",s:"Б-1"},{id:"office",x:180,y:150,w:120,h:70,l:"КАБИНЕТ",s:"Б-2"},
+ {id:"lab",x:20,y:230,w:120,h:90,l:"ЛАБОРАТОРИЯ",s:"В-1"},{id:"diesel",x:180,y:250,w:120,h:70,l:"ДИЗЕЛЬНАЯ",s:"В-2"},
+ {id:"store",x:20,y:350,w:120,h:70,l:"СКЛАД",s:"Г-1"},{id:"hangar",x:180,y:350,w:120,h:80,l:"АНГАР",s:"Г-2"}
+];
+function renderMap(){let s='<rect x="142" y="30" width="16" height="390" fill="rgba(29,58,95,.35)" stroke="#1d3a5f"/>';
+ s+='<line class="corr2" x1="150" y1="30" x2="150" y2="420"/><line class="f" x1="80" y1="130" x2="80" y2="105" stroke="#4a7fa6"/><circle cx="80" cy="100" r="4" fill="none" stroke="#4a7fa6"/><circle cx="80" cy="100" r="9" fill="none" stroke="#1d3a5f"/>';
+ s+='<path d="M300 20 L300 40 M295 26 L300 18 L305 26" stroke="#7fa3c0" fill="none"/><text x="292" y="14" class="rsub">С</text>';
+ for(const r of MAP_ROOMS){const locked=LOCS[r.id].locked&&!S.unlocked[r.id];const cls="room"+(S.visited.includes(r.id)?" visited":"")+(S.current===r.id?" current":"")+(locked?" locked":"");
+  s+='<g data-loc="'+r.id+'"><rect class="'+cls+'" x="'+r.x+'" y="'+r.y+'" width="'+r.w+'" height="'+r.h+'" rx="5"/><text class="rlab" x="'+(r.x+10)+'" y="'+(r.y+24)+'">'+r.l+'</text><text class="rsub" x="'+(r.x+10)+'" y="'+(r.y+38)+'">СЕКТОР '+r.s+"</text>";
+  if(locked)s+='<text x="'+(r.x+r.w-22)+'" y="'+(r.y+22)+'" font-size="12">🔒</text>';
+  if(S.current===r.id)s+='<circle cx="'+(r.x+r.w-16)+'" cy="'+(r.y+r.h-14)+'" r="5" fill="#8fd8ff"><animate attributeName="opacity" values="1;.3;1" dur="1.6s" repeatCount="indefinite"/></circle>';s+="</g>";}
+ s+='<line x1="20" y1="450" x2="80" y2="450" stroke="#7fa3c0"/><line x1="20" y1="446" x2="20" y2="454" stroke="#7fa3c0"/><line x1="80" y1="446" x2="80" y2="454" stroke="#7fa3c0"/><text x="90" y="454" class="rsub">20 М</text><text x="20" y="466" class="rsub">СХЕМА // ОБЪЕКТ М-7 · ПОЛЯРНАЯ НОЧЬ</text>';
+ $("mapSvg").innerHTML=s;}
+$("mapSvg").addEventListener("click",e=>{const g=e.target.closest("[data-loc]");if(!g)return;initAudio();enterLocation(g.dataset.loc);});
+function enterLocation(id){const L=LOCS[id];
+ if(L.locked&&!S.unlocked[id]){sfx.err();if(id==="office")openKeypad();else toast(L.lockMsg,"warn");
+  const r=$("mapSvg").querySelector('[data-loc="'+id+'"] rect');if(r){r.classList.add("shake");setTimeout(()=>r.classList.remove("shake"),400);}return;}
+ S.current=id;if(!S.visited.includes(id))S.visited.push(id);save();sfx.click();document.body.classList.remove("map-open");renderMap();renderLocation();renderObjective();}
+
+/* ===== ЛОКАЦИЯ ===== */
+function renderLocation(resetPanel = true){
+ const L=LOCS[S.current];$("locName").textContent=L.n;$("locDesc").textContent=L.d;let s=L.scene;
+ for(const z of L.zones){const done=S.searched.includes(z.id);const ly=z.y>26?z.y-7:z.y+z.h+15;
+  s+='<g class="zone'+(done?" done":"")+'" data-zone="'+z.id+'"><rect class="zbox" x="'+z.x+'" y="'+z.y+'" width="'+z.w+'" height="'+z.h+'" rx="6"/><text class="zlab" x="'+z.x+'" y="'+ly+'">'+z.l+'</text><text class="zmark" x="'+(z.x+z.w-16)+'" y="'+(z.y+16)+'" fill="'+(done?"#5fe3a1":"#8fd8ff")+'">'+(done?"✓":"●")+"</text></g>";}
+ $("sceneSvg").innerHTML=s;
+ if(resetPanel) {
+   $("inspBody").innerHTML='<p class="hint">Выберите светящуюся зону на схеме комнаты. Осмотренные зоны отмечаются галочкой — к ним можно вернуться.</p>';
+ }
+}
+$("sceneSvg").addEventListener("click", e => {
+  initAudio();
+  const g = e.target.closest("[data-zone]");
+  if (g) inspect(g.dataset.zone);
+});
+function findZone(zid){for(const k in LOCS){const z=LOCS[k].zones.find(z=>z.id===zid);if(z)return z;}return null;}
+function clueCard(id,isNew){const c=CLUES[id];const num=String(CLUE_ORDER.indexOf(id)+1).padStart(2,"0");const notes=(S.notes&&S.notes[id])||[];
+ const nh=notes.map(n=>'<div class="clue-note"><b>＋ '+n.title+'</b><p>'+n.text+"</p></div>").join("");
+ return '<div class="clue-card'+(c.key?" keycard":"")+'"><span class="stamp">'+(c.key?"ПРЕДМЕТ":"УЛИКА")+' №'+num+'</span><h4>'+c.n+'</h4><div class="where">'+c.w+'</div><p>'+c.d+"</p>"+nh+'<div class="added">'+(isNew?"✓ ДОБАВЛЕНО В ЖУРНАЛ УЛИК":"✓ УЖЕ В ЖУРНАЛЕ")+"</div></div>";}
+function inspect(zid){const z=findZone(zid);if(!z)return;sfx.click();const first=!S.searched.includes(zid);if(first){S.searched.push(zid);save();}
+ let isNew=false;if(z.clue&&!has(z.clue)){isNew=true;grantClue(z.clue);}
+ let html='<div class="zh">ОСМОТР · '+z.l.toUpperCase()+"</div>";z.text.forEach(p=>html+="<p>"+p+"</p>");if(z.clue)html+=clueCard(z.clue,isNew);
+ if(ZONE_ITEMS[z.id])html+='<p><button class="btn btn-green" id="btnItem">ОСМОТРЕТЬ ПРЕДМЕТ ВБЛИЗИ</button></p>';
+ if(z.puzzle)html+='<p><button class="btn btn-accent" id="btnPuzzle">РАЗЛОЖИТЬ ПЕРФОКАРТЫ</button></p>';
+ if(z.sp==="tuner")html+=tunerHTML();if(z.sp==="tape")html+=tapeHTML();
+ $("inspBody").innerHTML=html;
+ if(ZONE_ITEMS[z.id])$("btnItem").onclick=()=>{initAudio();sfx.click();openItem(ZONE_ITEMS[z.id]);};
+ if(z.puzzle)$("btnPuzzle").onclick=()=>{initAudio();sfx.click();openPuzzle(z.puzzle,null);};
+ if(z.sp==="tuner")bindTuner();if(z.sp==="tape")bindTape();
+ renderLocation(false);renderJournal();renderObjective();updateCounters();}
+function grantClue(id){if(has(id))return;S.found.push(id);newClueId=id;save();sfx.find();toast("НАХОДКА: "+CLUES[id].n,"ok");
+ if(CLUES[id].key){S.unlocked.hangar=true;save();setTimeout(()=>{sfx.unlock();toast("АНГАР РАЗБЛОКИРОВАН","ok");renderMap();},500);}
+ const newRecs=CHARS.filter(c=>c.recs.some(r=>r.req===id));if(newRecs.length)setTimeout(()=>toast("ДОСЬЕ: новая запись — "+newRecs.map(c=>c.n.split(" ")[1]||c.n).join(", ")),700);
+ renderMap();renderJournal();renderObjective();updateCounters();
+ queueClueFound(id);}
+function addNote(clueId,noteId,title,text){if(!S.notes[clueId])S.notes[clueId]=[];if(S.notes[clueId].some(n=>n.id===noteId))return false;
+ S.notes[clueId].push({id:noteId,title,text});save();sfx.paper();toast("ЗАПИСЬ ДОПОЛНЕНА: "+CLUES[clueId].n,"ok");renderJournal();return true;}
+
+/* ===== ОКНО НАХОДКИ / ОСМОТР УЛИКИ ===== */
+function dossierRecordsForClue(id){const out=[];CHARS.forEach(c=>c.recs.forEach(r=>{if(r.req===id)out.push({char:c.n,title:r.t});}));return out;}
+function dossierNoticeHtml(recs){if(!recs||!recs.length)return "";
+ return '<div class="dossier-notice"><b>＋ ДОСЬЕ ОБНОВЛЕНО · НОВАЯ ЗАПИСЬ</b>'+recs.map(r=>'<div class="dn-row"><span class="dn-char">'+r.char+'</span><span class="dn-title">«'+r.title+'»</span></div>').join("")+"</div>";}
+function clueRelationsHtml(id){const rel=PAIRS.filter(p=>(p.a===id||p.b===id)&&hasDed(p.id));
+ return rel.length?rel.map(p=>'<div class="ded"><b>'+p.t+"</b><p>"+p.x+"</p></div>").join(""):'<p style="color:var(--dim)">Связей пока не установлено. Подберите этой улике пару в журнале.</p>';}
+function clueInfoBody(id,isNew,dossierHtml){return clueCard(id,isNew)+(dossierHtml||"")+'<p style="font-size:11px;letter-spacing:2px;color:var(--teal)">УСТАНОВЛЕННЫЕ СВЯЗИ:</p>'+clueRelationsHtml(id);}
+function queueClueFound(id){clueModalQueue.push({id,recs:dossierRecordsForClue(id)});if(!clueModalBusy)microtask(processClueQueue);}
+function processClueQueue(){if(clueModalBusy||!clueModalQueue.length)return;clueModalBusy=true;const it=clueModalQueue.shift();showClueFoundModal(it.id,it.recs);}
+function showClueFoundModal(id,recs){const returnCtx=activeModalContext;activeModalContext=null;
+ const selLabel=sel.includes(id)?"УБРАТЬ ИЗ ВЫБОРА":"ВЫБРАТЬ ДЛЯ СОПОСТАВЛЕНИЯ";
+ const close=showModal(mHead("ОСМОТР УЛИКИ")+'<div class="m-body"><div class="found-banner">✓ НОВАЯ НАХОДКА · ДОБАВЛЕНО В ЖУРНАЛ</div>'+clueInfoBody(id,true,dossierNoticeHtml(recs))+'</div><div class="m-foot"><button class="btn btn-accent" id="ciSel">'+selLabel+'</button><button class="btn btn-green" id="ciAccept">ПРИНЯТЬ УЛИКУ</button></div>',
+  {onClose:()=>{clueModalBusy=false;if(returnCtx)reopenContext(returnCtx);if(clueModalQueue.length)microtask(processClueQueue);}});
+ $("ciSel").onclick=()=>{toggleSel(id);close();};
+ $("ciAccept").onclick=()=>close();}
+function openClueInfo(id){activeModalContext=null;
+ const close=showModal(mHead("ОСМОТР УЛИКИ")+'<div class="m-body">'+clueInfoBody(id,false,"")+'</div><div class="m-foot"><button class="btn btn-accent" id="ciSel">'+(sel.includes(id)?"УБРАТЬ ИЗ ВЫБОРА":"ВЫБРАТЬ ДЛЯ СОПОСТАВЛЕНИЯ")+"</button></div>");
+ $("ciSel").onclick=()=>{toggleSel(id);close();};}
+
+/* ===== СТАРЫЙ ТЮНЕР / ПЛЁНКА ===== */
+function tunerHTML(){return '<div class="tuner"><div class="t-read"><span id="tf">'+S.freq+'</span> <small>кГц</small></div><input type="range" id="tune" min="5000" max="9000" step="5" value="'+S.freq+'"><div class="t-scale"><span>5000</span><span>6000</span><span>7000</span><span>8000</span><span>9000</span></div><button class="btn btn-green" id="tlisten">СЛУШАТЬ ЭФИР</button><div id="tres"></div></div>';}
+function bindTuner(){const r=$("tune");r.addEventListener("input",()=>{S.freq=+r.value;$("tf").textContent=r.value;save();});
+ $("tlisten").onclick=()=>{initAudio();const f=S.freq;
+  if(f===8190){sfx.radio();if(has("note")){S.tuned=true;save();$("tres").innerHTML="Сквозь треск — несущая и ритмичные позывные: «…СЛАВА-2… ОКНО… 04:00…» Частота из записки подтверждена. Окно откроется в 04:00. Вы не опоздали — вы рано.";toast("ЧАСТОТА ПОДТВЕРЖДЕНА: 8190 кГц","ok");}
+   else $("tres").innerHTML="На этой частоте — ритмичные позывные, разобрать невозможно: «…СЛАВА… ОКНО…» Нужны расписание и точное время. Где-то на станции они записаны.";}
+  else{sfx.static();const bands=["Шипение. Где-то далеко — морзянка погоды, не для вас.","Треск, свист несущей. Эфир пуст, как каюты.","Атмосферные разряды. Ни одного голоса.","Слабый тональный сигнал — и снова снег в эфире."];$("tres").textContent=bands[Math.floor(f/1000)%bands.length];}};}
+function tapeHTML(){return '<div style="margin:10px 0"><button class="btn btn-green" id="tapePlay">▶ ПРОСЛУШАТЬ ПЛЁНКУ</button> <button class="btn" id="tapeRead">РАСШИФРОВКА</button></div><ol class="tape-lines" id="tapeLines"><li><b>ГУРЬЕВ:</b> «Четыреста литров сольёшь — генератор встанет через неделю. Кому ты продаёшь этот рейс, начальник?»</li><li><b>СЕВЕРОВ:</b> «Не тебе решать, Степан. Бумага подписана.»</li><li><b>ГУРЬЕВ:</b> «Бумага! А люди? Ключников же против был — ты его поэтому…»</li><li><b>СЕВЕРОВ:</b> «Замолчи. Запись выключи.»</li><li><b>КОВАЛЁВ (издалека):</b> «Виктор Андреич! „Слава“ дала окно на четверг!»</li><li><i>(треск, конец записи)</i></li></ol>';}
+function bindTape(){$("tapePlay").onclick=()=>{initAudio();sfx.tape();const ol=$("tapeLines");ol.classList.remove("play","show");void ol.offsetWidth;ol.classList.add("play");};$("tapeRead").onclick=()=>{sfx.click();$("tapeLines").classList.add("show");};}
+
+/* ===== ОСМОТР ПРЕДМЕТА ===== */
+function openItem(id){activeModalContext={type:"item",id};const it=ITEMS[id],st=ist(id),t=st.time||0,parts=it.parts[t]||[];
+ let hot="";for(const p of parts){const done=st.parts.includes(t+":"+p.id);const ly=p.y>24?p.y-7:p.y+p.h+14;
+  hot+='<g class="part'+(done?" done":"")+'" data-part="'+p.id+'"><rect class="pbox" x="'+p.x+'" y="'+p.y+'" width="'+p.w+'" height="'+p.h+'" rx="6"/><text class="plab" x="'+p.x+'" y="'+ly+'">'+p.l+"</text></g>";}
+ const msg=st.last||{title:"Осмотр вблизи",text:"Андрей осматривает предмет вблизи, а не только окидывает комнату взглядом. Нажимайте на детали. Переключатель времени — реконструкция по сохранившимся следам, не машина времени."};
+ const timeBtns=it.times.map((label,i)=>'<button class="btn btn-sm'+(i===t?" on":"")+'" data-time="'+i+'">'+label+"</button>").join("");
+ const close=showModal(mHead("ОСМОТР ПРЕДМЕТА · "+it.title)+'<div class="m-body"><div class="sub" style="color:var(--dim);font-size:10px;letter-spacing:1px;margin-bottom:8px">'+it.sub+'</div><div class="timebar">'+timeBtns+'</div><div class="item-grid"><div class="item-svg-wrap"><svg class="itemSvg" viewBox="0 0 720 430">'+it.draw(t,st.flags)+hot+'</svg></div><div class="item-info"><h4>'+msg.title+'</h4><div class="msg">'+msg.text+'</div><div class="sub" style="margin-top:12px">ОСМОТРЕНО ДЕТАЛЕЙ: '+st.parts.length+'</div></div></div></div><div class="m-foot"><button class="btn" id="itemClose">ЗАКРЫТЬ ОСМОТР</button></div>',{xwide:true});
+ $("itemClose").onclick=close;
+ document.querySelectorAll("[data-time]").forEach(b=>b.onclick=()=>{st.time=+b.dataset.time;st.last=null;save();sfx.paper();openItem(id);});
+ document.querySelectorAll("[data-part]").forEach(g=>g.onclick=()=>itemPart(id,g.dataset.part));}
+function itemPart(id,partId){const it=ITEMS[id],st=ist(id),t=st.time||0,p=(it.parts[t]||[]).find(x=>x.id===partId);if(!p)return;
+ const key=t+":"+partId;if(!st.parts.includes(key))st.parts.push(key);const a=p.a;
+ if(a.needFlag&&!st.flags[a.needFlag]){st.last={title:a.title,text:a.needText};sfx.err();save();openItem(id);return;}
+ if(a.type==="info"){st.last={title:a.title,text:a.text};sfx.click();}
+ else if(a.type==="flag"){st.flags[a.flag]=!st.flags[a.flag];st.last={title:a.title,text:a.text};sfx.creak();}
+ else if(a.type==="clue"){st.last={title:a.title,text:a.text};grantClue(a.clue);}
+ else if(a.type==="note"){const added=addNote(a.clue,a.note,a.title,a.text);st.last={title:a.title,text:added?a.text:"Эта деталь уже осмотрена и записана. Новых следов нет."};}
+ else if(a.type==="playtape"){st.last={title:a.title,text:a.text};sfx.tape();}
+ else if(a.type==="puzzle"){save();openPuzzle(a.puzzle,id);return;}
+ save();openItem(id);}
+
+/* ===== ГОЛОВОЛОМКИ ===== */
+function openPuzzle(id,origin){activeModalContext={type:"puzzle",id,origin};if(id==="circuit")openCircuit(origin);else if(id==="carrier")openCarrier(origin);else if(id==="cards")openCards(origin);}
+function puzzleShell(id,origin,body,extraFoot){const meta=PUZZLE_META[id],p=S.puzzles[id];
+ const foot=(origin?'<button class="btn" id="pzBack">НАЗАД К ПРЕДМЕТУ</button>':'<button class="btn" id="pzBack">ЗАКРЫТЬ</button>')+'<button class="btn btn-danger" id="pzReset">СБРОС</button>'+(extraFoot||"");
+ const close=showModal(mHead("ГОЛОВОЛОМКА · "+meta.title)+'<div class="m-body"><p>'+meta.goal+'</p><div class="puzzle-hint"><b>ПОДСКАЗКА:</b> '+meta.hint+'</div>'+body+'<div class="puzzle-status'+(p.solved?" ok":"")+'" id="pzStatus">'+(p.solved?"✓ ГОЛОВОЛОМКА РЕШЕНА. Награда уже в журнале.":"")+'</div></div><div class="m-foot">'+foot+"</div>",{xwide:true});
+ $("pzBack").onclick=()=>{close();if(origin)openItem(origin);};
+ $("pzReset").onclick=()=>{resetPuzzle(id);sfx.click();openPuzzle(id,origin);};
+ return close;}
+function resetPuzzle(id){if(id==="circuit")S.puzzles.circuit={wires:[],sel:null,solved:false};
+ else if(id==="carrier")S.puzzles.carrier={freq:8150,solved:false};
+ else if(id==="cards")S.puzzles.cards={order:CARD_INIT.slice(),sel:null,solved:false};
+ save();toast("Головоломка сброшена. Уже выданные улики остаются в журнале.","warn");}
+function markSolved(id,clueId){const p=S.puzzles[id];if(p.solved)return;p.solved=true;save();grantClue(clueId);sfx.ded();updateCounters();}
+function wireKey(a,b){return [a,b].sort().join("|");}
+function openCircuit(origin){const p=S.puzzles.circuit;let wires="";
+ for(const w of p.wires){const[a,b]=w.split("|");const na=CIRCUIT_NODES.find(n=>n.id===a),nb=CIRCUIT_NODES.find(n=>n.id===b);const mx=(na.x+nb.x)/2,my=(na.y+nb.y)/2-30;wires+='<path class="wire" d="M'+na.x+" "+na.y+" Q"+mx+" "+my+" "+nb.x+" "+nb.y+'"/>';}
+ let sockets="";for(const n of CIRCUIT_NODES){const linked=p.wires.some(w=>w.split("|").includes(n.id));const cls="socket"+(p.sel===n.id?" sel":"")+(linked?" linked":"");
+  sockets+='<g class="'+cls+'" data-node="'+n.id+'"><circle cx="'+n.x+'" cy="'+n.y+'" r="24"/><text class="ptxt" x="'+n.x+'" y="'+(n.y+4)+'" text-anchor="middle">'+n.id.toUpperCase()+'</text><text class="plab" x="'+n.x+'" y="'+(n.y+44)+'" text-anchor="middle">'+n.l+"</text></g>";}
+ const body='<div class="puzzle-wrap"><svg class="puzzle-svg" viewBox="0 0 660 360"><rect class="pff" x="20" y="20" width="620" height="320" rx="8"/><text class="plab" x="40" y="50">СХЕМА НА КРЫШКЕ: АКБ → ТУМБЛЕР → ПЕРЕДАТЧИК → ЗЕМЛЯ · ГЕНЕРАТОР → ЛАМПА</text>'+wires+sockets+'</svg></div>';
+ const close=puzzleShell("circuit",origin,body);
+ document.querySelectorAll("[data-node]").forEach(g=>g.onclick=()=>{const n=g.dataset.node;if(p.solved){sfx.click();return;}
+  if(!p.sel){p.sel=n;sfx.click();save();openCircuit(origin);return;}
+  if(p.sel===n){p.sel=null;sfx.click();save();openCircuit(origin);return;}
+  const key=wireKey(p.sel,n);const ok=CIRCUIT_REQ.some(r=>wireKey(r[0],r[1])===key);
+  if(ok&&!p.wires.includes(key)){p.wires.push(key);p.sel=null;sfx.wire();save();if(p.wires.length===CIRCUIT_REQ.length)markSolved("circuit","circuit_tag");openCircuit(origin);}
+  else{p.sel=null;sfx.err();save();$("pzStatus").className="puzzle-status bad";$("pzStatus").textContent="По схеме эти клеммы не соединяются. Сверьтесь с надписью на крышке.";}});}
+function carrierStrength(f){return Math.max(0,1-Math.abs(f-8190)/100);}
+function openCarrier(origin){const p=S.puzzles.carrier,f=p.freq,st=carrierStrength(f),angle=-135+(f-8100)/200*270,needle=-58+st*116;
+ const hint=has("note")?"Целевая частота из записки: <b>8190 кГц</b>. Доведите шкалу кнопками ±1.":"Целевая частота в записке Соколовой. Если записки нет — ищите максимум стрелки и самый чистый тон.";
+ const body='<div class="puzzle-wrap"><div class="carrier-grid"><div class="dial" id="cDial"><svg viewBox="0 0 220 220"><circle class="pff" cx="110" cy="110" r="96"/><circle class="pf" cx="110" cy="110" r="72"/><circle class="pf" cx="110" cy="110" r="14"/><g id="cRotor" transform="rotate('+angle+' 110 110)"><line class="pf" x1="110" y1="110" x2="110" y2="42"/><circle cx="110" cy="42" r="6" fill="#8fd8ff"/></g><text class="plab" x="110" y="205" text-anchor="middle">ВАЛ НАСТРОЙКИ · КРУТИТЬ МЫШЬЮ</text></svg></div><div class="meter"><div class="meter-read"><span id="cFreq">'+f+'</span> <small>кГц</small></div><svg class="puzzle-svg" viewBox="0 0 320 150"><rect class="pff" x="10" y="10" width="300" height="130" rx="6"/><path class="pf" d="M40 110 Q160 20 280 110"/><text class="plab" x="35" y="130">СЛАБО</text><text class="plab" x="245" y="130">МАКС.</text><g id="cNeedle" transform="rotate('+needle+' 160 110)"><line x1="160" y1="110" x2="160" y2="38" stroke="#ffb454" stroke-width="3"/><circle cx="160" cy="110" r="7" fill="#ffb454"/></g></svg><div style="font-size:11px;color:var(--dim);margin-top:6px">СИГНАЛ: <span id="cPct">'+Math.round(st*100)+'</span>% · '+hint+'</div><div class="carrier-btns"><button class="btn btn-sm" data-cf="-10">−10</button><button class="btn btn-sm" data-cf="-1">−1</button><button class="btn btn-sm" data-cf="1">+1</button><button class="btn btn-sm" data-cf="10">+10</button><button class="btn btn-sm btn-green" id="cListen">СЛУШАТЬ</button></div></div></div></div>';
+ const close=puzzleShell("carrier",origin,body);
+ function setFreq(nf,beep){nf=Math.max(8100,Math.min(8300,Math.round(nf)));if(nf===p.freq&&beep)return;p.freq=nf;save();const s=carrierStrength(nf);
+  $("cFreq").textContent=nf;$("cPct").textContent=Math.round(s*100);
+  $("cRotor").setAttribute("transform","rotate("+(-135+(nf-8100)/200*270)+" 110 110)");
+  $("cNeedle").setAttribute("transform","rotate("+(-58+s*116)+" 160 110)");
+  if(beep)sfx.beep(s);
+  if(nf===8190&&!p.solved){markSolved("carrier","carrier");$("pzStatus").className="puzzle-status ok";$("pzStatus").textContent="✓ Несущая поймана: 8190 кГц. Контрольный сигнал записан в журнал.";}}
+ document.querySelectorAll("[data-cf]").forEach(b=>b.onclick=()=>{initAudio();setFreq(p.freq+ +b.dataset.cf,true);});
+ $("cListen").onclick=()=>{initAudio();sfx.beep(carrierStrength(p.freq));setTimeout(()=>sfx.beep(carrierStrength(p.freq)),160);setTimeout(()=>sfx.beep(carrierStrength(p.freq)),320);};
+ const dial=$("cDial");let drag=false,lastBeep=0;
+ function fromEvent(e){const r=dial.getBoundingClientRect(),cx0=r.left+r.width/2,cy0=r.top+r.height/2;let ang=Math.atan2(e.clientY-cy0,e.clientX-cx0)*180/Math.PI+90;if(ang>180)ang-=360;ang=Math.max(-135,Math.min(135,ang));setFreq(8100+(ang+135)/270*200,performance.now()-lastBeep>70);lastBeep=performance.now();}
+ dial.addEventListener("pointerdown",e=>{initAudio();drag=true;dial.setPointerCapture(e.pointerId);fromEvent(e);});
+ dial.addEventListener("pointermove",e=>{if(drag)fromEvent(e);});
+ dial.addEventListener("pointerup",()=>drag=false);dial.addEventListener("pointercancel",()=>drag=false);}
+function openCards(origin){const p=S.puzzles.cards;let cards="";
+ p.order.forEach((idx,pos)=>{const c=CARD_DATA[idx];const holes=Array.from({length:24},(_,i)=>((idx*7+i*3)%5<2)?"on":"").map((cls,i)=>'<span class="'+cls+'"></span>').join("");
+  cards+='<div class="pcard'+(p.sel===pos?" sel":"")+(p.solved&&idx===1?" anom":"")+'" data-pos="'+pos+'"><div class="pc-date">'+c.d+'</div><div class="pc-holes">'+holes+'</div><div class="pc-code">'+(p.solved?c.code:"ПРОБИВКА НЕ РАСШИФРОВАНА")+"</div></div>";});
+ const body='<div class="puzzle-wrap"><div class="pcards">'+cards+'</div></div>';
+ const close=puzzleShell("cards",origin,body,'<button class="btn btn-accent" id="cardCheck">ПРОВЕРИТЬ ПОРЯДОК</button>');
+ document.querySelectorAll("[data-pos]").forEach(el=>el.onclick=()=>{if(p.solved){sfx.click();return;}const pos=+el.dataset.pos;
+  if(p.sel===null||p.sel===undefined){p.sel=pos;sfx.click();}else if(p.sel===pos){p.sel=null;sfx.click();}else{const a=p.sel;[p.order[a],p.order[pos]]=[p.order[pos],p.order[a]];p.sel=null;sfx.paper();}
+  save();openCards(origin);});
+ $("cardCheck").onclick=()=>{const sorted=p.order.every((idx,i,arr)=>i===0||CARD_DATA[arr[i-1]].k<=CARD_DATA[idx].k);
+  if(sorted){markSolved("cards","cards");sfx.ded();openCards(origin);}
+  else{sfx.err();$("pzStatus").className="puzzle-status bad";$("pzStatus").textContent="Порядок нарушен. Даты должны идти от 28.06 к 04.07.";}};}
+
+/* ===== ЖУРНАЛ ===== */
+function renderJournal(){const b=$("jrBody");
+ if(curTab==="clues"){if(!S.found.length){b.innerHTML='<div class="empty">Пока пусто. Осматривайте светящиеся зоны на схемах комнат — всё найденное попадает сюда.</div>';return;}
+  b.innerHTML=S.found.map(id=>{const c=CLUES[id];const si=sel.indexOf(id);return '<div class="clue'+(si>=0?" sel":"")+(newClueId===id?" new":"")+'" data-id="'+id+'"><button class="clue-main" data-sel="'+id+'"><span class="cn"><span class="cat">'+c.c+"</span>"+c.n+'</span><span class="cw">'+c.w+"</span></button>"+(si>=0?'<span class="selbadge">'+(si+1)+"</span>":"")+'<button class="clue-info" data-info="'+id+'" title="Осмотреть">?</button></div>';}).join("");newClueId=null;}
+ else if(curTab==="doss")renderDossier();else renderDed();}
+$("jrBody").addEventListener("click",e=>{const s=e.target.closest("[data-sel]");const i=e.target.closest("[data-info]");if(s){initAudio();sfx.click();toggleSel(s.dataset.sel);}else if(i){initAudio();sfx.click();openClueInfo(i.dataset.info);}});
+function toggleSel(id){const ix=sel.indexOf(id);if(ix>=0)sel.splice(ix,1);else{if(sel.length>=2)sel.shift();sel.push(id);}renderJournal();renderCmpBar();}
+function renderCmpBar(){const n=$("selNames");if(!sel.length)n.innerHTML="Выберите две улики для сопоставления.";else n.innerHTML=sel.map((id,i)=>"<b>"+(i+1)+".</b> "+CLUES[id].n).join("<br>");$("btnCompare").disabled=sel.length!==2;}
+$("btnCompare").onclick=()=>{initAudio();doCompare();};
+function doCompare(){if(sel.length!==2)return;const[a,b]=sel;const p=PAIRS.find(p=>(p.a===a&&p.b===b)||(p.a===b&&p.b===a));sel=[];renderJournal();renderCmpBar();
+ if(p){if(hasDed(p.id)){showModal(mHead("СВЯЗЬ УЖЕ УСТАНОВЛЕНА")+'<div class="m-body"><p class="big">'+p.t+"</p><p>"+p.x+"</p></div>");sfx.click();return;}
+  S.ded.push(p.id);save();sfx.ded();let extra="";if(p.unlock==="office"&&!S.unlocked.office){S.unlocked.office=true;save();extra='<p class="ok">КОД ПОДОБРАН: 1704 — кабинет начальника разблокирован.</p>';setTimeout(()=>{sfx.unlock();renderMap();},600);}
+  showModal(mHead("СВЯЗЬ УСТАНОВЛЕНА · "+S.ded.length+"/"+TOTAL_PAIRS)+'<div class="m-body"><p class="big ok">'+p.t+"</p><p>"+p.x+"</p>"+extra+'<p style="color:var(--dim);font-size:11px">'+CLUES[a].n+" ↔ "+CLUES[b].n+"</p></div>");
+  renderDed();renderObjective();updateCounters();renderMap();}
+ else{S.attempts++;save();sfx.err();let h=FAIL_HINTS[failIdx++%FAIL_HINTS.length];const anyA=PAIRS.some(p=>p.a===a||p.b===a),anyB=PAIRS.some(p=>p.a===b||p.b===b);if(anyA&&anyB)h+=" Каждая из этих улик связана с чем-то другим — ищите им других собеседников.";showModal(mHead("СВЯЗИ НЕТ")+'<div class="m-body"><p class="warn">'+h+"</p></div>");}}
+function renderDossier(){const b=$("jrBody");b.innerHTML=CHARS.map(c=>{const recs=c.recs.map(r=>has(r.req)?'<div class="rec"><b>▸ '+r.t+"</b>"+r.x+"</div>":'<div class="rec locked">▓▓ запись закрыта — найдите связанную улику</div>').join("");
+ return '<div class="doss" data-doss="'+c.id+'"><div class="doss-h"><b>'+c.n+"</b><span>"+c.recs.filter(r=>has(r.req)).length+"/"+c.recs.length+' ▾</span></div><div class="doss-b"><div class="role">'+c.r+'</div><div class="prof">'+c.p+"</div>"+recs+"</div></div>";}).join("");
+ b.querySelectorAll(".doss-h").forEach(h=>h.addEventListener("click",()=>{sfx.click();h.parentElement.classList.toggle("open");}));}
+function renderDed(){const b=$("jrBody");if(!S.ded.length){b.innerHTML='<div class="empty">Связей пока нет. Выберите две улики во вкладке «Улики» и нажмите «Сопоставить». Верные пары дают выводы — иногда они открывают двери.</div>';return;}
+ b.innerHTML=S.ded.map(id=>{const p=PAIRS.find(p=>p.id===id);return '<div class="ded"><b>◆ '+p.t+"</b><p>"+p.x+'</p><div class="pair">'+CLUES[p.a].n+" ↔ "+CLUES[p.b].n+"</div></div>";}).join("");}
+document.querySelectorAll(".tab").forEach(t=>t.addEventListener("click",()=>{sfx.click();curTab=t.dataset.tab;document.querySelectorAll(".tab").forEach(x=>x.classList.toggle("on",x===t));renderJournal();}));
+
+/* ===== ЗАДАЧА / СЧЁТЧИКИ ===== */
+function renderObjective(){let t;const f=has;
+ if(S.found.length<3)t="Осмотритесь в медпункте: кровать, шкаф, тумбочка, стойка. Каждая зона что-то помнит.";
+ else if(!f("cipher"))t="Проверьте радиорубку: журналы входящих и исходящих, архив плёнок.";
+ else if(!S.unlocked.hangar)t="Ангар заперт. Ключ ищите там, где хранят инструмент — в дизельной.";
+ else if(!S.unlocked.office&&f("photo")&&f("anketa"))t="Фотография и анкета говорят об одной дате. Сопоставьте их в журнале — получите код кабинета.";
+ else if(!S.unlocked.office)t="Кабинет начальника заперт кодовым замком. Ищите личную дату Северова — фото, анкета, документы.";
+ else if(!f("packet"))t="В кабинете начальника — сейф. Документы решают всё.";
+ else if(S.ded.length<6)t="Сопоставляйте улики попарно: связи вскрывают мотивы. Кровь, топливо, плёнка, опись — у каждой истории есть пара.";
+ else t="У вас достаточно материала. Откройте «Финал», выдвиньте версию и подтвердите её цепочкой из четырёх улик.";
+ let extra="";
+ if(!S.puzzles.circuit.solved&&S.visited.includes("radio"))extra="Передатчик можно осмотреть вблизи: тумблер, клеммная панель, вал настройки.";
+ else if(!S.puzzles.cards.solved&&S.visited.includes("store"))extra="На складе есть счётный стол с перфокартами.";
+ else if(!has("burn")&&S.visited.includes("store"))extra="Печь на складе можно реконструировать в состоянии «до».";
+ else if(!has("seal")&&S.unlocked.office)extra="Сейф можно реконструировать в состоянии «до отъезда».";
+ $("objective").innerHTML=t+(extra?'<br><span style="color:var(--dim)">＋ '+extra+"</span>":"");}
+function updateCounters(){$("cClues").textContent=S.found.length+"/"+TOTAL_CLUES;$("cDed").textContent=S.ded.length+"/"+TOTAL_PAIRS;$("cPuzzles").textContent=solvedCount()+"/"+TOTAL_PUZZLES;$("tClues").textContent="("+S.found.length+")";$("tDed").textContent="("+S.ded.length+")";}
+
+/* ===== КОДОВЫЙ ЗАМОК ===== */
+function openKeypad(){const hint=hasDed("d_code")?'<p class="ok">Из вывода: код 1704 — дата первой зимовки Северова.</p>':'<p style="color:var(--dim)">Четыре цифры. Что-то личное для начальника. Осмотрите его каюту и документы.</p>';
+ const close=showModal(mHead("КОДОВЫЙ ЗАМОК · КАБИНЕТ")+'<div class="m-body"><p>Латунная панель с четырьмя колёсиками. Замок старый, но упрямый.</p>'+hint+'<div class="kpad"><input id="kcode" maxlength="4" inputmode="numeric" placeholder="····" autocomplete="off"><button class="btn btn-green" id="kopen">ОТКРЫТЬ</button></div><p id="kerr" class="bad"></p></div>');
+ const inp=$("kcode");inp.focus();
+ const tryOpen=()=>{const v=inp.value.replace(/\D/g,"");if(v==="1704"){S.unlocked.office=true;save();sfx.unlock();close();toast("КАБИНЕТ РАЗБЛОКИРОВАН","ok");renderMap();enterLocation("office");}
+  else{sfx.err();$("kerr").textContent="Замок не поддался. Не та дата.";inp.value="";inp.classList.add("shake");setTimeout(()=>inp.classList.remove("shake"),400);}};
+ $("kopen").onclick=tryOpen;inp.addEventListener("keydown",e=>{if(e.key==="Enter")tryOpen();});}
+
+/* ===== ФИНАЛ ===== */
+$("btnFinale").onclick=()=>{initAudio();sfx.click();openFinale();};
+function openFinale(){curVersion=null;chain=[];
+ const vhtml=VERSIONS.map(v=>'<div class="vcard" data-v="'+v.id+'"><b>'+v.n+"</b><p>"+v.d+"</p></div>").join("");
+ const close=showModal(mHead("ФИНАЛ · ВЕРСИЯ ПРОИСШЕДШЕГО")+'<div class="m-body"><p>Вы можете выдвинуть версию в любой момент. Неверная версия завершит расследование альтернативной концовкой. Истинная требует точной цепочки из четырёх улик.</p>'+vhtml+'<p style="font-size:11px;letter-spacing:2px;color:var(--teal);margin-top:14px">ЦЕПОЧКА ДОКАЗАТЕЛЬСТВ · ВЫБЕРИТЕ 4:</p><div class="chain" id="chainSlots"></div><div class="chips" id="chainChips"></div><div class="fin-err" id="finErr"></div></div><div class="m-foot"><button class="btn" id="finCancel">ОТЛОЖИТЬ</button><button class="btn btn-accent" id="finGo" disabled>ПОДТВЕРДИТЬ ВЕРСИЮ</button></div>',{wide:true});
+ $("finCancel").onclick=close;
+ function draw(){document.querySelectorAll(".vcard").forEach(c=>c.classList.toggle("on",c.dataset.v===curVersion));
+  $("chainSlots").innerHTML=[0,1,2,3].map(i=>chain[i]?'<div class="slot fill">'+(i+1)+". "+CLUES[chain[i]].n+"</div>":'<div class="slot">звено '+(i+1)+"</div>").join("");
+  $("chainChips").innerHTML=S.found.length?S.found.map(id=>'<button class="chip'+(chain.includes(id)?" on":"")+'" data-ch="'+id+'">'+CLUES[id].n+"</button>").join(""):'<span class="empty">Находок пока нет — цепочку не собрать.</span>';
+  $("finGo").disabled=!(curVersion&&chain.length===4);}
+ document.querySelectorAll(".vcard").forEach(c=>c.addEventListener("click",()=>{sfx.click();curVersion=c.dataset.v;$("finErr").textContent="";draw();}));
+ $("chainChips").addEventListener("click",e=>{const ch=e.target.closest("[data-ch]");if(!ch)return;sfx.click();const id=ch.dataset.ch;const ix=chain.indexOf(id);if(ix>=0)chain.splice(ix,1);else{if(chain.length>=4){$("finErr").textContent="Цепочка — ровно четыре звена. Уберите лишнее.";return;}chain.push(id);}draw();});
+ $("finGo").onclick=()=>{const v=curVersion,ch=chain.slice();
+  if(v==="truth"){const ok=TRUE_CHAIN.every(id=>ch.includes(id));if(!ok){sfx.err();$("finErr").textContent="Версия верная, но цепочка не держится. Нужны четыре звена: причина закрытия, приказ, документ из сейфа и то, что решило вашу судьбу. Подберите точнее.";return;}
+   close();confirmModal("Подтвердить истинную версию? Расследование завершится — вы сможете вернуться к станции после финала.",()=>showEnding("truth",ch),"ПОДТВЕРДИТЬ");}
+  else{close();confirmModal("Выдвинуть эту версию? Она может оказаться неверной — и завершить расследование альтернативной концовкой.",()=>showEnding(v,ch),"ВЫДВИНУТЬ");}};
+ draw();}
+function showEnding(id,ch){const E=ENDINGS[id];addEnding(id);sfx.ded();const seen=getEndings();
+ showModal('<div class="m-body"><h1>'+E.t+'</h1><span class="etype '+E.type+'">'+E.label+"</span>"+E.ps.map(p=>"<p>"+p+"</p>").join("")+'<div class="echain">ВАША ЦЕПОЧКА: <b>'+ch.map(c=>CLUES[c].n).join(" → ")+"</b></div>"+'<div class="estats"><span>НАХОДКИ: <b>'+S.found.length+"/"+TOTAL_CLUES+"</b></span><span>СВЯЗИ: <b>"+S.ded.length+"/"+TOTAL_PAIRS+"</b></span><span>ПРИБОРЫ: <b>"+solvedCount()+"/"+TOTAL_PUZZLES+"</b></span><span>ОСМОТРОВ: <b>"+S.searched.length+"</b></span><span>КОНЦОВКИ: <b>"+seen.length+"/3</b></span></div></div>"+'<div class="m-foot"><button class="btn" id="endBack">ВЕРНУТЬСЯ К РАССЛЕДОВАНИЮ</button><button class="btn btn-danger" id="endRestart">НАЧАТЬ ЗАНОВО</button></div>',{wide:true,cls:"ending",lock:true});
+ $("endBack").onclick=()=>{modalClose&&modalClose();toast("Расследование продолжается. Концовка сохранена в настройках.","ok");};
+ $("endRestart").onclick=()=>confirmModal("Сбросить прогресс и начать заново? Открытые концовки сохранятся.",resetGame,"СБРОСИТЬ");}
+
+/* ===== НАСТРОЙКИ / СПРАВКА ===== */
+$("btnSettings").onclick=()=>{initAudio();sfx.click();const seen=getEndings();const names={truth:"Тихий берег",murder:"Кровавый дизель",self:"Провал в памяти"};
+ const eList=["truth","murder","self"].map(id=>'<div class="ded" style="border-left-color:'+(seen.includes(id)?"var(--green)":"var(--line)")+'"><b>'+(seen.includes(id)?"◆ ":"▓▓ ")+(seen.includes(id)?names[id]:"не открыта")+"</b></div>").join("");
+ const close=showModal(mHead("НАСТРОЙКИ")+'<div class="m-body"><p style="font-size:11px;letter-spacing:2px;color:var(--teal)">ЗВУК</p><p><button class="btn" id="setSound">'+(S.sound?"♪ ЗВУК: ВКЛ":"♪ ЗВУК: ВЫКЛ")+'</button> <span style="color:var(--dim);font-size:11px">ветер, эфир, щелчки — всё синтезируется в браузере</span></p><p style="font-size:11px;letter-spacing:2px;color:var(--teal);margin-top:14px">ГОЛОВОЛОМКИ · '+solvedCount()+"/"+TOTAL_PUZZLES+'</p><div class="ded"><b>circuit</b><p>'+(S.puzzles.circuit.solved?"решена":"не решена")+'</p></div><div class="ded"><b>carrier</b><p>'+(S.puzzles.carrier.solved?"решена":"не решена")+'</p></div><div class="ded"><b>cards</b><p>'+(S.puzzles.cards.solved?"решена":"не решена")+'</p></div><p style="font-size:11px;letter-spacing:2px;color:var(--teal);margin-top:14px">КОНЦОВКИ · '+seen.length+'/3</p>'+eList+'<p style="font-size:11px;letter-spacing:2px;color:var(--red);margin-top:14px">ПРОГРЕСС</p><p style="color:var(--dim);font-size:12px">Сохраняется автоматически в localStorage этого браузера.</p><button class="btn btn-danger" id="setReset">СБРОСИТЬ ПРОГРЕСС</button></div>');
+ $("setSound").onclick=()=>{initAudio();setSound(!S.sound);$("setSound").textContent=S.sound?"♪ ЗВУК: ВКЛ":"♪ ЗВУК: ВЫКЛ";sfx.click();};
+ $("setReset").onclick=()=>{close();confirmModal("Полностью сбросить расследование? Все находки, связи и открытые двери будут потеряны. Концовки сохранятся.",resetGame,"СБРОСИТЬ");};};
+function resetGame(){try{localStorage.removeItem(SAVE_KEY);}catch(e){}location.reload();}
+$("btnHelp").onclick=()=>{initAudio();sfx.click();showModal(mHead("КАК ИГРАТЬ")+'<div class="m-body"><p><b class="ok">1.</b> На карте слева выбирайте локацию. Запертые двери открываются ключом или кодом.</p><p><b class="ok">2.</b> В комнате кликайте светящиеся зоны. Находки попадают в журнал справа.</p><p><b class="ok">3.</b> В журнале выберите две улики и нажмите «Сопоставить». Верная пара даёт вывод — иногда он открывает дверь. Неверная — подскажет, что искать.</p><p><b class="ok">4.</b> Во вкладке «Досье» открываются записи персонажей по мере находок. «Связи» хранит все выводы.</p><p><b class="ok">5.</b> В радиорубке можно крутить шкалу передатчика и слушать эфир. Плёнку №7 можно прослушать.</p><p><b class="ok">6.</b> Некоторые зоны позволяют осмотреть предмет вблизи: нажимайте на детали, открывайте крышки, включайте тумблеры. Часть деталей открывает головоломки.</p><p><b class="ok">7.</b> Переключатель «Сейчас / До / Реконструкция» восстанавливает состояние предмета по следам. В прошлом состоянии могут быть улики, которых нет в настоящем.</p><p><b class="ok">8.</b> Когда будете готовы — «Финал»: выдвиньте версию и подтвердите её цепочкой из четырёх улик. Неверная версия даст альтернативную концовку.</p><p style="color:var(--dim)">Без таймеров. Прогресс сохраняется автоматически. Три концовки.</p></div>');};
+$("btnSound").onclick=()=>{initAudio();setSound(!S.sound);sfx.click();};
+$("btnJournal").onclick=()=>{sfx.click();if(innerWidth<=1150){document.body.classList.toggle("jr-open");document.body.classList.remove("map-open");}else pulseCmp();};
+$("btnMap").onclick=()=>{sfx.click();document.body.classList.toggle("map-open");document.body.classList.remove("jr-open");};
+$("btnCmp").onclick=()=>{sfx.click();if(innerWidth<=1150){document.body.classList.add("jr-open");document.body.classList.remove("map-open");}curTab="clues";document.querySelectorAll(".tab").forEach(x=>x.classList.toggle("on",x.dataset.tab==="clues"));renderJournal();pulseCmp();toast("Выберите две улики в журнале","warn");};
+function pulseCmp(){const b=$("cmpBar");b.classList.remove("attn");void b.offsetWidth;b.classList.add("attn");}
+$("scrim").onclick=()=>document.body.classList.remove("jr-open","map-open");
+
+/* ===== СТАРТ ===== */
+function renderAll(){renderMap();renderLocation();renderJournal();renderCmpBar();renderObjective();updateCounters();setSound(S.sound);}
+function initStartScreen(){const hasSave=!!S.started;$("btnContinue").style.display=hasSave?"inline-block":"none";$("start").style.display="flex";}
+initStartScreen();
+$("btnNew").onclick=()=>{initAudio();const go=()=>{try{localStorage.removeItem(SAVE_KEY);}catch(e){}S=defState();S.started=true;save();sel=[];chain=[];
+ $("start").style.display="none";renderAll();
+ const close=showModal(mHead("ПРОБУЖДЕНИЕ")+'<div class="m-body"><p>Полярная ночь. Сутки девятнадцатые без связи.</p><p>Вы очнулись в медпункте от ровного гула дизеля. Голова тяжёлая, во рту — металл. Последнее воспоминание: буровая, треск льда, вспышка света — и жар.</p><p>Вы выходите в коридор. Пять коек заправлены. Пять кружек сухие. Радиорубка молчит. Людей — нет.</p><p class="warn">Осмотрите станцию. Соберите улики. Сопоставьте их. Решите, что здесь произошло — и кого винить.</p></div><div class="m-foot"><button class="btn btn-accent" id="introGo">ПРИСТУПИТЬ К ОСМОТРУ</button></div>',{lock:true});
+ $("introGo").onclick=()=>{S.introSeen=true;save();close();sfx.click();};};
+ if(S.started&&S.found.length)confirmModal("Начать новую игру? Текущий прогресс будет стёрт.",go,"НАЧАТЬ ЗАНОВО");else go();};
+$("btnContinue").onclick=()=>{initAudio();sfx.click();$("start").style.display="none";renderAll();toast("РАССЛЕДОВАНИЕ ПРОДОЛЖЕНО · находок: "+S.found.length,"ok");};
+renderAll();
+</script>
+</body>
+</html>
